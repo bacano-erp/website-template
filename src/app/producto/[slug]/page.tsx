@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getPrimaryProductImage } from "@bacano/sdk";
-import { getBuildClient, formatPrice } from "@/lib/bacano";
+import type { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/AddToCart";
+import { formatPrice, getBuildClient } from "@/lib/bacano";
 
 type Params = { slug: string };
 
@@ -82,21 +83,23 @@ export default async function ProductPage({
 
   return (
     <article className="grid gap-10 md:grid-cols-2">
-      <div className="aspect-square overflow-hidden rounded-lg bg-neutral-100">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-100">
         {image?.detailUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- static export has no image optimizer
-          <img
+          <Image
             src={image.detailUrl}
             alt={image.alt ?? product.name}
-            className="h-full w-full object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority
+            className="object-cover"
           />
         ) : null}
       </div>
 
       <div>
-        <h1 className="text-2xl font-semibold">{product.name}</h1>
+        <h1 className="font-semibold text-2xl">{product.name}</h1>
         {product.brand && (
-          <p className="mt-1 text-sm text-neutral-500">{product.brand.name}</p>
+          <p className="mt-1 text-neutral-500 text-sm">{product.brand.name}</p>
         )}
 
         {/* Baked at build time: this is the price crawlers index. Checkout
@@ -125,7 +128,7 @@ export default async function ProductPage({
           {variant ? (
             <AddToCart productVariantId={variant.id} />
           ) : (
-            <p className="text-sm text-neutral-500">
+            <p className="text-neutral-500 text-sm">
               Este producto no tiene variantes disponibles.
             </p>
           )}

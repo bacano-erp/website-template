@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useAvailability, useCart } from "@bacano/sdk/react";
+import { useState } from "react";
 
 /**
  * The live island on an otherwise static page.
@@ -11,11 +11,7 @@ import { useAvailability, useCart } from "@bacano/sdk/react";
  * than a brief loading state. Both are read from the Bacano API in the browser,
  * on every view.
  */
-export function AddToCart({
-  productVariantId,
-}: {
-  productVariantId: string;
-}) {
+export function AddToCart({ productVariantId }: { productVariantId: string }) {
   const { data: availability, loading: checkingStock } = useAvailability([
     productVariantId,
   ]);
@@ -35,7 +31,9 @@ export function AddToCart({
       await addItem(productVariantId, 1);
       setAdded(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo agregar al carrito");
+      setError(
+        e instanceof Error ? e.message : "No se pudo agregar al carrito",
+      );
     } finally {
       setPending(false);
     }
@@ -43,16 +41,21 @@ export function AddToCart({
 
   if (checkingStock) {
     return (
+      // role="status" so the wait is announced; a bare div with aria-label is
+      // silent to screen readers.
       <div
+        role="status"
+        aria-live="polite"
         className="h-11 w-full animate-pulse rounded bg-neutral-100"
-        aria-label="Consultando disponibilidad"
-      />
+      >
+        <span className="sr-only">Consultando disponibilidad</span>
+      </div>
     );
   }
 
   if (!inStock) {
     return (
-      <p className="rounded bg-neutral-100 px-4 py-3 text-sm text-neutral-600">
+      <p className="rounded bg-neutral-100 px-4 py-3 text-neutral-600 text-sm">
         {stock?.label ?? "Agotado"}
       </p>
     );
@@ -64,11 +67,11 @@ export function AddToCart({
         type="button"
         onClick={handleAdd}
         disabled={pending || added}
-        className="h-11 w-full rounded bg-neutral-900 px-4 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:opacity-50"
+        className="h-11 w-full rounded bg-neutral-900 px-4 font-medium text-sm text-white transition hover:bg-neutral-700 disabled:opacity-50"
       >
         {pending ? "Agregando…" : added ? "Agregado ✓" : "Agregar al carrito"}
       </button>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-red-600 text-sm">{error}</p>}
     </div>
   );
 }

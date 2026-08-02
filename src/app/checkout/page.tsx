@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useCart } from "@bacano/sdk/react";
+import Link from "next/link";
 import { formatPrice } from "@/lib/bacano";
 
 /**
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
   if (!cart || cart.items.length === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-semibold">Pago</h1>
+        <h1 className="font-semibold text-2xl">Pago</h1>
         <p className="mt-4 text-neutral-600">Tu carrito está vacío.</p>
         <Link href="/catalogo/" className="mt-6 inline-block text-sm underline">
           Ver catálogo
@@ -45,9 +45,9 @@ export default function CheckoutPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold">Pago</h1>
+      <h1 className="font-semibold text-2xl">Pago</h1>
 
-      <dl className="mt-6 space-y-2 border-b border-neutral-200 pb-6 text-sm">
+      <dl className="mt-6 space-y-2 border-neutral-200 border-b pb-6 text-sm">
         <div className="flex justify-between">
           <dt className="text-neutral-600">Subtotal</dt>
           <dd>{formatPrice(cart.totals.subtotal)}</dd>
@@ -56,18 +56,18 @@ export default function CheckoutPage() {
           <dt className="text-neutral-600">Impuestos</dt>
           <dd>{formatPrice(cart.totals.tax)}</dd>
         </div>
-        <div className="flex justify-between text-base font-semibold">
+        <div className="flex justify-between font-semibold text-base">
           <dt>Total</dt>
           <dd>{formatPrice(cart.totals.total)}</dd>
         </div>
       </dl>
 
-      <div className="mt-6 rounded border border-dashed border-neutral-300 p-6">
-        <p className="text-sm font-medium">Checkout pendiente de implementar</p>
-        <p className="mt-2 text-sm text-neutral-600">
+      <div className="mt-6 rounded border border-neutral-300 border-dashed p-6">
+        <p className="font-medium text-sm">Checkout pendiente de implementar</p>
+        <p className="mt-2 text-neutral-600 text-sm">
           Implementa aquí entrega, dirección y pago con{" "}
-          <code className="rounded bg-neutral-100 px-1">client.checkout.*</code>.
-          Consulta los comentarios de este archivo y el README del SDK.
+          <code className="rounded bg-neutral-100 px-1">client.checkout.*</code>
+          . Consulta los comentarios de este archivo y el README del SDK.
         </p>
       </div>
 

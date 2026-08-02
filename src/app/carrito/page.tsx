@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useCart } from "@bacano/sdk/react";
 import { resolveProductPricing } from "@bacano/sdk";
+import { useCart } from "@bacano/sdk/react";
+import Link from "next/link";
 import { formatPrice } from "@/lib/bacano";
 
 /**
@@ -19,7 +19,7 @@ export default function CartPage() {
   if (!cart || cart.items.length === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-semibold">Tu carrito</h1>
+        <h1 className="font-semibold text-2xl">Tu carrito</h1>
         <p className="mt-4 text-neutral-600">Tu carrito está vacío.</p>
         <Link
           href="/catalogo/"
@@ -33,7 +33,7 @@ export default function CartPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold">Tu carrito</h1>
+      <h1 className="mb-6 font-semibold text-2xl">Tu carrito</h1>
 
       <ul className="divide-y divide-neutral-200">
         {cart.items.map((item) => {
@@ -43,51 +43,52 @@ export default function CartPage() {
           ).currentPrice;
 
           return (
-          <li key={item.id} className="flex items-center gap-4 py-4">
-            <div className="flex-1">
-              <p className="font-medium">{name}</p>
-              <p className="text-sm text-neutral-500">
-                {formatPrice(unitPrice)}
-              </p>
-            </div>
+            <li key={item.id} className="flex items-center gap-4 py-4">
+              <div className="flex-1">
+                <p className="font-medium">{name}</p>
+                <p className="text-neutral-500 text-sm">
+                  {formatPrice(unitPrice)}
+                </p>
+              </div>
 
-            <input
-              type="number"
-              min={1}
-              value={item.quantity}
-              onChange={(e) =>
-                updateItem(item.id, Math.max(1, Number(e.target.value)))
-              }
-              className="h-9 w-16 rounded border border-neutral-300 px-2 text-sm"
-              aria-label={`Cantidad de ${name}`}
-            />
+              <input
+                type="number"
+                min={1}
+                value={item.quantity}
+                onChange={(e) =>
+                  updateItem(item.id, Math.max(1, Number(e.target.value)))
+                }
+                className="h-9 w-16 rounded border border-neutral-300 px-2 text-sm"
+                aria-label={`Cantidad de ${name}`}
+              />
 
-            <button
-              type="button"
-              onClick={() => removeItem(item.id)}
-              className="text-sm text-neutral-500 hover:text-red-600"
-            >
-              Quitar
-            </button>
-          </li>
+              <button
+                type="button"
+                onClick={() => removeItem(item.id)}
+                className="text-neutral-500 text-sm hover:text-red-600"
+              >
+                Quitar
+              </button>
+            </li>
           );
         })}
       </ul>
 
-      <div className="mt-6 flex items-center justify-between border-t border-neutral-200 pt-6">
-        <span className="text-lg font-semibold">
+      <div className="mt-6 flex items-center justify-between border-neutral-200 border-t pt-6">
+        <span className="font-semibold text-lg">
           Total {formatPrice(cart.totals.total)}
         </span>
         <Link
           href="/checkout/"
-          className="rounded bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-neutral-700"
+          className="rounded bg-neutral-900 px-5 py-2.5 font-medium text-sm text-white hover:bg-neutral-700"
         >
           Continuar al pago
         </Link>
       </div>
 
-      <p className="mt-4 text-xs text-neutral-500">
-        Los precios y el stock se confirman contra Bacano al finalizar la compra.
+      <p className="mt-4 text-neutral-500 text-xs">
+        Los precios y el stock se confirman contra Bacano al finalizar la
+        compra.
       </p>
     </div>
   );

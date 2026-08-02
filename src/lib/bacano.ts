@@ -1,4 +1,4 @@
-import { createBacanoClient, type BacanoClient } from "@bacano/sdk";
+import { type BacanoClient, createBacanoClient } from "@bacano/sdk";
 
 /**
  * Build-time Bacano client.

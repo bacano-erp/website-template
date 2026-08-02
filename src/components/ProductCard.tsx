@@ -1,6 +1,7 @@
-import Link from "next/link";
 import type { Product } from "@bacano/sdk";
 import { getPrimaryProductImage } from "@bacano/sdk";
+import Image from "next/image";
+import Link from "next/link";
 import { formatPrice } from "@/lib/bacano";
 
 /**
@@ -20,19 +21,22 @@ export function ProductCard({ product }: { product: Product }) {
       href={href}
       className="group block rounded-lg border border-neutral-200 p-3 transition hover:border-neutral-400"
     >
-      <div className="aspect-square overflow-hidden rounded bg-neutral-100">
+      {/* `fill` inside a sized box reserves the space before the image loads,
+          so the grid never shifts. next/image does not resize here (static
+          export has no optimizer) — the Bacano CDN serves pre-sized files. */}
+      <div className="relative aspect-square overflow-hidden rounded bg-neutral-100">
         {image?.cardUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- static export has no image optimizer; images are pre-sized by the Bacano CDN
-          <img
+          <Image
             src={image.cardUrl}
             alt={image.alt ?? product.name}
-            className="h-full w-full object-cover transition group-hover:scale-105"
-            loading="lazy"
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-cover transition group-hover:scale-105"
           />
         ) : null}
       </div>
 
-      <h3 className="mt-3 text-sm font-medium">{product.name}</h3>
+      <h3 className="mt-3 font-medium text-sm">{product.name}</h3>
 
       {pricing?.currentPrice != null && (
         <p className="mt-1 text-sm">

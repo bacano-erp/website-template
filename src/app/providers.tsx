@@ -1,8 +1,8 @@
 "use client";
 
-import { ClerkProvider, useAuth } from "@clerk/react";
-import { esES } from "@clerk/localizations";
 import { BacanoProvider } from "@bacano/sdk/react";
+import { esES } from "@clerk/localizations";
+import { ClerkProvider, useAuth } from "@clerk/react";
 import type { ReactNode } from "react";
 
 const apiUrl = process.env.NEXT_PUBLIC_BACANO_API_URL!;

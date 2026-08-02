@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getBuildClient } from "@/lib/bacano";
 import { ProductCard } from "@/components/ProductCard";
+import { getBuildClient } from "@/lib/bacano";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -12,7 +12,7 @@ export default async function CatalogPage() {
 
   return (
     <>
-      <h1 className="mb-6 text-2xl font-semibold">Catálogo</h1>
+      <h1 className="mb-6 font-semibold text-2xl">Catálogo</h1>
 
       {products.length === 0 ? (
         <p className="text-neutral-600">No hay productos publicados.</p>

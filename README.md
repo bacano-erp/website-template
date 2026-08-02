@@ -41,9 +41,24 @@ The site needs a website record in Bacano — a slug, a branch/chain, active pro
 ```bash
 pnpm build       # static export → out/
 pnpm start       # serve out/ locally, exactly as CloudFront will
-pnpm typecheck
-pnpm lint
 ```
+
+### Code quality
+
+Two tools, deliberately — they do different jobs and neither replaces the other.
+
+| | |
+| --- | --- |
+| **Biome** | Formatting, import ordering, Tailwind class sorting, general lint |
+| **ESLint** | Next.js-specific rules (`next/core-web-vitals`) that Biome cannot express |
+
+```bash
+pnpm verify        # typecheck + biome + eslint — what CI runs
+pnpm check:fix     # auto-fix formatting, imports and class order
+pnpm typecheck
+```
+
+`.github/workflows/ci.yml` runs `verify` on every PR, so a change cannot reach the deploy pipeline without passing.
 
 ---
 

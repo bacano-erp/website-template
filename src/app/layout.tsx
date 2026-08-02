@@ -22,9 +22,9 @@ export default function RootLayout({
     <html lang="es">
       <body className="min-h-screen bg-white text-neutral-900 antialiased">
         <Providers>
-          <header className="border-b border-neutral-200">
+          <header className="border-neutral-200 border-b">
             <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-              <Link href="/" className="text-lg font-semibold">
+              <Link href="/" className="font-semibold text-lg">
                 {siteName}
               </Link>
               <div className="flex items-center gap-6 text-sm">
@@ -40,8 +40,8 @@ export default function RootLayout({
 
           <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>
 
-          <footer className="mt-16 border-t border-neutral-200">
-            <div className="mx-auto max-w-5xl px-4 py-8 text-sm text-neutral-500">
+          <footer className="mt-16 border-neutral-200 border-t">
+            <div className="mx-auto max-w-5xl px-4 py-8 text-neutral-500 text-sm">
               © {new Date().getFullYear()} {siteName}
             </div>
           </footer>

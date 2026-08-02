@@ -1,0 +1,104 @@
+name: Deploy
+
+# Builds the static site and ships it to this website's S3 bucket + CloudFront.
+#
+# There are no AWS keys in this repository. The job assumes a per-site IAM role
+# in Bacano's AWS account via GitHub OIDC. That role's trust policy names this
+# repository and the `main` ref specifically, and it can only write to this
+# site's bucket and invalidate this site's distribution — nothing else.
+#
+# Every value below is injected as a repository *variable* (not a secret) when
+# Bacano provisions the site. None of them are sensitive.
+
+on:
+  # A code change: developer pushes to main.
+  push:
+    branches: [main]
+  # A content change: Bacano dispatches this when someone hits "Publish" in the
+  # platform. Same pipeline for both, so there is only ever one way to deploy.
+  repository_dispatch:
+    types: [bacano-publish]
+  workflow_dispatch:
+
+concurrency:
+  # A newer deploy supersedes one already in flight — the freshest content wins
+  # and two jobs can never race to write the same bucket.
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required to request the GitHub OIDC token for AWS
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build static site
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_BACANO_API_URL: ${{ vars.BACANO_API_URL }}
+          NEXT_PUBLIC_BACANO_WEBSITE_SLUG: ${{ vars.BACANO_WEBSITE_SLUG }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL }}
+          NEXT_PUBLIC_SITE_NAME: ${{ vars.SITE_NAME }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.CLERK_PUBLISHABLE_KEY }}
+
+      - name: Fail if the build produced nothing
+        run: |
+          if [ ! -f out/index.html ]; then
+            echo "::error::out/index.html is missing — the build did not produce a static export."
+            echo "Check that next.config.ts still sets output: 'export'."
+            exit 1
+          fi
+          echo "::notice::built $(find out -type f | wc -l | tr -d ' ') files"
+
+      - name: Assume the per-site AWS role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # Hashed assets are immutable and cached hard. HTML must never be cached
+      # at the edge for long, or a publish would not be visible until the TTL
+      # expired. Order matters: assets first, so a freshly uploaded page never
+      # references a chunk that has not landed yet.
+      - name: Upload immutable assets
+        run: |
+          aws s3 sync out/ "s3://${{ vars.AWS_S3_BUCKET }}/" \
+            --delete \
+            --exclude "*.html" \
+            --exclude "*.json" \
+            --cache-control "public,max-age=31536000,immutable"
+
+      - name: Upload HTML and data
+        run: |
+          aws s3 sync out/ "s3://${{ vars.AWS_S3_BUCKET }}/" \
+            --delete \
+            --exclude "*" \
+            --include "*.html" \
+            --include "*.json" \
+            --cache-control "public,max-age=0,must-revalidate"
+
+      # One invalidation of "/*" counts as a single path against the monthly
+      # free allowance, so this is cheaper than enumerating changed files.
+      - name: Invalidate CloudFront
+        run: |
+          ID=$(aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*" \
+            --query 'Invalidation.Id' --output text)
+          echo "::notice::invalidation $ID created for ${{ vars.SITE_URL }}"

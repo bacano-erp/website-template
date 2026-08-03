@@ -12,7 +12,7 @@ export default async function HomePage() {
     <>
       <section className="mb-12">
         <h1 className="font-semibold text-3xl tracking-tight">
-          {process.env.NEXT_PUBLIC_SITE_NAME ?? "Bacano Store"}
+          {process.env.NEXT_PUBLIC_SITE_NAME || "Bacano Store"}
         </h1>
         <p className="mt-2 text-neutral-600">
           Replace this section with the store&apos;s own hero and brand

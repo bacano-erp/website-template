@@ -29,6 +29,11 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Skip when this repository is not a provisioned site. The template repo
+    # itself has no bucket, so without this guard every push to the template
+    # fails a deploy that was never meant to run. Bacano sets these variables
+    # when it provisions a real site, at which point the job starts working.
+    if: vars.AWS_S3_BUCKET != '' && vars.BACANO_WEBSITE_SLUG != ''
     permissions:
       contents: read
       id-token: write # required to request the GitHub OIDC token for AWS

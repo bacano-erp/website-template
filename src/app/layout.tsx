@@ -3,8 +3,11 @@ import Link from "next/link";
 import { Providers } from "./providers";
 import "./globals.css";
 
-const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Bacano Store";
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+// `||` not `??`: an unset GitHub Actions variable arrives as an empty string,
+// which `??` passes straight through — and `new URL("")` throws "Invalid URL"
+// somewhere unrelated, giving no hint that SITE_URL is what's missing.
+const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "Bacano Store";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

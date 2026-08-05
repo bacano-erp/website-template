@@ -132,7 +132,7 @@ These exist because breaking them is expensive later.
 - **No secrets in this repo.** Everything here ships to the browser. Clerk's *publishable* key is fine; a secret key never is. Read [`AUTHENTICATION.md`](https://www.npmjs.com/package/@bacano/sdk) in the SDK before touching auth.
 - **Keep `output: 'export'`.** The deploy pipeline expects `out/`; switching to SSR silently breaks it.
 - **Use the Bacano CDN for product images.** Static export has no image optimizer, so `next/image` cannot resize on demand.
-- **Keep the slug single-label** (no dots). It becomes `<slug>.shops.bacano.app`, covered by a wildcard certificate that only spans one level.
+- **Keep the slug single-label** (no dots). It becomes `<slug>.sites.bacano.app`, covered by a wildcard certificate that only spans one level.
 
 ---
 

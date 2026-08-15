@@ -4,6 +4,7 @@ import { getBuildClient } from "@/lib/bacano";
 
 export const metadata: Metadata = {
   title: "Catálogo",
+  alternates: { canonical: "/catalogo/" },
 };
 
 export default async function CatalogPage() {

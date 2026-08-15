@@ -14,6 +14,12 @@ export const metadata: Metadata = {
   title: { default: siteName, template: `%s · ${siteName}` },
   description: `${siteName} — tienda en línea`,
   openGraph: { siteName, type: "website", url: siteUrl },
+  // Canonical URLs, absolute via metadataBase. Without these a store reachable
+  // on more than one hostname — the Bacano subdomain and the customer's own
+  // domain both stay live after a custom domain is attached — asks search
+  // engines to pick which one is real, and they do not always pick the one you
+  // would. Each page overrides `canonical` with its own path.
+  alternates: { canonical: "/" },
 };
 
 export default function RootLayout({

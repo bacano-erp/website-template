@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/AddToCart";
+import { Markdown } from "@/components/Markdown";
 import { formatPrice, getBuildClient } from "@/lib/bacano";
+import { toPlainText } from "@/lib/markdown";
 
 type Params = { slug: string };
 
@@ -64,12 +66,18 @@ export async function generateMetadata({
 
   const image = product.seoImage ?? getPrimaryProductImage(product.media);
 
+  // Plain text, not Markdown: these fields are shown verbatim in search
+  // results and social previews, where `**bold**` reads as punctuation.
+  const summary = product.seoDescription ?? product.description;
+  const description = summary ? toPlainText(summary) : undefined;
+
   return {
+    alternates: { canonical: `/producto/${slug}/` },
     title: product.seoTitle ?? product.name,
-    description: product.seoDescription ?? product.description ?? undefined,
+    description,
     openGraph: {
       title: product.seoTitle ?? product.name,
-      description: product.seoDescription ?? product.description ?? undefined,
+      description,
       images: image?.detailUrl ? [image.detailUrl] : undefined,
     },
   };
@@ -126,11 +134,7 @@ export default async function ProductPage({
           </p>
         )}
 
-        {product.description && (
-          <p className="mt-4 whitespace-pre-line text-neutral-700">
-            {product.description}
-          </p>
-        )}
+        {product.description && <Markdown>{product.description}</Markdown>}
 
         {/* Live island — stock is never baked. */}
         <div className="mt-8">

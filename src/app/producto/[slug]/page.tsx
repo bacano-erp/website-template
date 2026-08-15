@@ -7,6 +7,8 @@ import { formatPrice, getBuildClient } from "@/lib/bacano";
 
 type Params = { slug: string };
 
+const EMPTY_CATALOG_SLUG = "sin-productos";
+
 /**
  * Enumerates every product page to generate. `output: 'export'` requires this
  * for dynamic segments — a slug missing here simply will not exist on the site.
@@ -39,6 +41,13 @@ export async function generateStaticParams(): Promise<Params[]> {
       );
     }
   }
+
+  // Next refuses a dynamic route with an empty param list under
+  // `output: export`, reporting it as a missing generateStaticParams(). An
+  // empty catalogue is not an error — it is what every store looks like before
+  // its first product — so emit one placeholder page, which notFound() renders
+  // as the 404 it is.
+  if (params.length === 0) return [{ slug: EMPTY_CATALOG_SLUG }];
 
   return params;
 }

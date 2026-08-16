@@ -12,10 +12,11 @@ import {
   saveOrderReference,
 } from "@/lib/order-return";
 
-type State =
-  | { status: "checking" }
-  | { status: "unknown" }
-  | { status: PaymentOutcome; orderNumber: string | null };
+/** The outcome of the settlement attempt. Absent until it resolves. */
+type Settled = { status: PaymentOutcome; orderNumber: string | null };
+
+/** What the shopper is shown, including the cases no request can change. */
+type Display = "checking" | "unknown" | PaymentOutcome;
 
 /**
  * Where the payment gateway drops the shopper on the way back.
@@ -39,7 +40,7 @@ type State =
  */
 export function PaymentReturn() {
   const searchParams = useSearchParams();
-  const [state, setState] = useState<State>({ status: "checking" });
+  const [settled, setSettled] = useState<Settled | null>(null);
 
   const params = useMemo(
     () => readPaymentReturnParams(new URLSearchParams(searchParams.toString())),
@@ -48,11 +49,18 @@ export function PaymentReturn() {
 
   const { orderId, token, paymentSessionId, gatewayTransactionId } = params;
 
+  /**
+   * A return with no order reference is a fact about the URL, not something to
+   * discover — no request could change it. Deriving it during render keeps the
+   * effect free of a synchronous setState, which is the shape React warns
+   * about and which this used to do.
+   */
+  const display: Display = !(orderId && token)
+    ? "unknown"
+    : (settled?.status ?? "checking");
+
   useEffect(() => {
-    if (!orderId || !token) {
-      setState({ status: "unknown" });
-      return;
-    }
+    if (!orderId || !token) return;
 
     let cancelled = false;
     saveOrderReference(orderId, token);
@@ -79,7 +87,7 @@ export function PaymentReturn() {
       try {
         const order = await client.orders.waitForPayment({ orderId, token });
         if (cancelled) return;
-        setState({
+        setSettled({
           status: readPaymentOutcome(order.paymentStatus),
           orderNumber: order.orderNumber,
         });
@@ -92,7 +100,7 @@ export function PaymentReturn() {
         try {
           const order = await client.orders.getPublicOrder({ orderId, token });
           if (cancelled) return;
-          setState(
+          setSettled(
             order
               ? {
                   status: readPaymentOutcome(order.paymentStatus),
@@ -101,7 +109,7 @@ export function PaymentReturn() {
               : { status: "pending", orderNumber: null },
           );
         } catch {
-          if (!cancelled) setState({ status: "pending", orderNumber: null });
+          if (!cancelled) setSettled({ status: "pending", orderNumber: null });
         }
       }
     };
@@ -113,17 +121,17 @@ export function PaymentReturn() {
     };
   }, [orderId, token, paymentSessionId, gatewayTransactionId]);
 
-  const copy = MESSAGES[state.status];
+  const copy = MESSAGES[display];
 
   return (
     <section className="mx-auto max-w-md text-center">
       <h1 className="font-semibold text-2xl">{copy.title}</h1>
       <p className="mt-3 text-neutral-600">{copy.body}</p>
 
-      {state.status !== "checking" && state.status !== "unknown" && (
+      {display !== "checking" && display !== "unknown" && (
         <p className="mt-4 text-neutral-500 text-sm">
-          {"orderNumber" in state && state.orderNumber
-            ? `Pedido ${state.orderNumber}`
+          {settled?.orderNumber
+            ? `Pedido ${settled.orderNumber}`
             : orderId
               ? `Pedido ${orderId}`
               : null}
@@ -148,7 +156,7 @@ export function PaymentReturn() {
   );
 }
 
-const MESSAGES: Record<State["status"], { title: string; body: string }> = {
+const MESSAGES: Record<Display, { title: string; body: string }> = {
   checking: {
     title: "Confirmando tu pago…",
     body: "Estamos verificando el resultado con la pasarela. No cierres esta ventana.",

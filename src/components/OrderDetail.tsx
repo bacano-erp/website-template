@@ -13,6 +13,15 @@ type State =
   | { status: "ready"; order: PublicOrder };
 
 /**
+ * A page opened without an order id cannot become anything else, so it is
+ * derived during render rather than discovered by an effect — which also keeps
+ * the effect free of the synchronous setState React warns about.
+ *
+ * The token is different: it may come from local storage, which does not exist
+ * while prerendering, so resolving it has to wait for the browser.
+ */
+
+/**
  * A guest's order, looked up with the token they were given.
  *
  * There is no session here on purpose: most storefronts sell to shoppers who
@@ -31,42 +40,45 @@ export function OrderDetail() {
   const tokenFromUrl = searchParams.get("token");
 
   useEffect(() => {
-    if (!orderId) {
-      setState({ status: "missing" });
-      return;
-    }
-
-    // The URL wins, but a shopper who reopened this page from history — or
-    // followed a link that lost its query string — still has the copy saved
-    // when the order was placed.
-    const token = tokenFromUrl ?? readOrderReference(orderId)?.token ?? null;
-    if (!token) {
-      setState({ status: "missing" });
-      return;
-    }
+    if (!orderId) return;
 
     let cancelled = false;
 
-    getBrowserClient()
-      .then((client) => client.orders.getPublicOrder({ orderId, token }))
-      .then((order) => {
+    const load = async () => {
+      const client = await getBrowserClient();
+
+      // The URL wins, but a shopper who reopened this page from history — or
+      // followed a link that lost its query string — still has the copy saved
+      // when the order was placed.
+      const token = tokenFromUrl ?? readOrderReference(orderId)?.token ?? null;
+      if (!token) {
+        if (!cancelled) setState({ status: "missing" });
+        return;
+      }
+
+      try {
+        const order = await client.orders.getPublicOrder({ orderId, token });
         if (cancelled) return;
         setState(order ? { status: "ready", order } : { status: "missing" });
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) setState({ status: "missing" });
-      });
+      }
+    };
+
+    void load();
 
     return () => {
       cancelled = true;
     };
   }, [orderId, tokenFromUrl]);
 
-  if (state.status === "loading") {
+  const display: State = orderId ? state : { status: "missing" };
+
+  if (display.status === "loading") {
     return <p className="text-neutral-600">Cargando tu pedido…</p>;
   }
 
-  if (state.status === "missing") {
+  if (display.status === "missing") {
     return (
       <div>
         <h1 className="font-semibold text-2xl">No encontramos el pedido</h1>
@@ -81,7 +93,7 @@ export function OrderDetail() {
     );
   }
 
-  const { order } = state;
+  const { order } = display;
   const outcome = readPaymentOutcome(order.paymentStatus);
 
   return (

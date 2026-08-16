@@ -2,8 +2,8 @@
  * Flattens Markdown to plain text for use in metadata.
  *
  * Meta descriptions, OpenGraph and Twitter cards are plain-text fields, and a
- * product description is Markdown — so `**Nintendo Switch 2**` was being handed
- * verbatim to search engines and social previews. That text is what a shopper
+ * product description is Markdown — so `**a bold product name**` was being
+ * handed verbatim to search engines and social previews. That is what a shopper
  * reads in the results page, which makes it a worse place for stray asterisks
  * than the product page itself.
  *

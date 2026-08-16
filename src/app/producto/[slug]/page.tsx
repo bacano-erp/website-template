@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/AddToCart";
+import { LivePrice } from "@/components/LivePrice";
 import { Markdown } from "@/components/Markdown";
-import { formatPrice, getBuildClient } from "@/lib/bacano";
+import { getBuildClient } from "@/lib/bacano";
 import { toPlainText } from "@/lib/markdown";
 
 type Params = { slug: string };
@@ -119,19 +120,16 @@ export default async function ProductPage({
           <p className="mt-1 text-neutral-500 text-sm">{product.brand.name}</p>
         )}
 
-        {/* Baked at build time: this is the price crawlers index. Checkout
-            re-validates against the ERP, which is the authoritative price. */}
-        {pricing?.currentPrice != null && (
-          <p className="mt-4 text-xl">
-            <span className="font-semibold">
-              {formatPrice(pricing.currentPrice)}
-            </span>
-            {pricing.hasDiscount && pricing.regularPrice != null && (
-              <span className="ml-2 text-base text-neutral-400 line-through">
-                {formatPrice(pricing.regularPrice)}
-              </span>
-            )}
-          </p>
+        {/* Baked for crawlers and first paint, then corrected live. A sale
+            ends because time passed, which triggers no rebuild — see
+            LivePrice. */}
+        {pricing?.currentPrice != null && variant && (
+          <LivePrice
+            productVariantId={variant.id}
+            bakedCurrentPrice={pricing.currentPrice}
+            bakedRegularPrice={pricing.regularPrice}
+            bakedHasDiscount={pricing.hasDiscount}
+          />
         )}
 
         {product.description && <Markdown>{product.description}</Markdown>}

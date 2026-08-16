@@ -15,7 +15,7 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
   const { data: availability, loading: checkingStock } = useAvailability([
     productVariantId,
   ]);
-  const { addItem } = useCart();
+  const { cart, addItem, getOrCreate } = useCart();
 
   const [pending, setPending] = useState(false);
   const [added, setAdded] = useState(false);
@@ -28,6 +28,20 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
     setPending(true);
     setError(null);
     try {
+      // A cart has to exist before anything can go in it. `addItem` writes
+      // against a session — an order id and a cart token — and throws
+      // "Start checkout with contact before syncing cart items to Bacano"
+      // when there is none, which is what every first click used to do.
+      //
+      // `getOrCreate()` with no arguments makes an anonymous one; contact
+      // details are collected later, by the store's own checkout, through
+      // `startCheckout`. Guarded on `cart` rather than called every time
+      // because it is a round trip, though it is safe to repeat: it sends the
+      // existing token and gets the same cart back.
+      if (!cart) {
+        await getOrCreate();
+      }
+
       await addItem(productVariantId, 1);
       setAdded(true);
     } catch (e) {

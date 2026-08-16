@@ -9,7 +9,14 @@ import { formatPrice } from "@/lib/bacano";
  *
  * A real checkout is store-specific (pickup vs shipping, which payment
  * providers, address requirements), so the template stops at the point where
- * those decisions start. The SDK surface you need:
+ * those decisions start.
+ *
+ * The cart that gets here is anonymous — AddToCart creates one with
+ * `getOrCreate()` so a shopper can fill it without identifying themselves.
+ * Collecting contact details is this page's job, and `cart.startCheckout({
+ * contact, fulfillmentFamily, items })` is what attaches them to the order.
+ *
+ * The SDK surface you need:
  *
  *   const client = useBacano();
  *   client.checkout.getLocationOptions()      // departments / municipalities

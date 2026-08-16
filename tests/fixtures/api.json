@@ -18,7 +18,7 @@
     "data": {
       "result": {
         "success": true,
-        "products": "[{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"name\": \"Producto de ejemplo\", \"slug\": \"producto-de-ejemplo\", \"brand\": null, \"color\": null, \"category\": \"ENTERTAINMENT_GAMING_MUSIC\", \"seo_title\": \"Producto de ejemplo\", \"created_at\": \"2026-08-15 21:31:55.028544+00\", \"updated_at\": \"2026-08-16 17:34:57.681496+00\", \"description\": \"Descripci\\u00f3n **de ejemplo** para las pruebas.\", \"subcategory\": \"00000000-0000-4000-8000-0000000000ff\", \"product_media\": [{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"file\": {\"name\": \"producto.webp\", \"mimeType\": \"image/webp\"}, \"order\": 0, \"file_id\": \"00000000-0000-4000-8000-0000000000ff\"}], \"seo_image_file\": null, \"seo_description\": null, \"long_description\": {\"type\": \"doc\", \"content\": [{\"type\": \"paragraph\", \"content\": [{\"type\": \"text\", \"text\": \"Contenido de ejemplo.\"}]}]}, \"measurement_unit\": \"UNITS\", \"product_variants\": [{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"sku\": \"\", \"depth\": null, \"order\": null, \"height\": null, \"length\": null, \"weight\": null, \"barcode\": \"\", \"product_variant_prices\": [{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"price\": 2399000, \"chain_id\": \"00000000-0000-4000-8000-0000000000ff\", \"price_type\": \"CLIENT\"}], \"product_variant_attributes\": []}], \"seo_image_file_id\": null, \"product_attributes\": [], \"listing_variant_ids\": [\"00000000-0000-4000-8000-0000000000ff\"], \"product_related_products\": []}]",
+        "products": "[{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"name\": \"Producto de ejemplo\", \"slug\": \"producto-de-ejemplo\", \"brand\": null, \"color\": null, \"category\": \"ENTERTAINMENT_GAMING_MUSIC\", \"seo_title\": \"Producto de ejemplo\", \"created_at\": \"2026-01-01 00:00:00.000000+00\", \"updated_at\": \"2026-01-02 00:00:00.000000+00\", \"description\": \"Descripci\\u00f3n **de ejemplo** para las pruebas.\", \"subcategory\": \"00000000-0000-4000-8000-0000000000ff\", \"product_media\": [{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"file\": {\"name\": \"producto.webp\", \"mimeType\": \"image/webp\"}, \"order\": 0, \"file_id\": \"00000000-0000-4000-8000-0000000000ff\"}], \"seo_image_file\": null, \"seo_description\": null, \"long_description\": {\"type\": \"doc\", \"content\": [{\"type\": \"paragraph\", \"content\": [{\"type\": \"text\", \"text\": \"Contenido de ejemplo.\"}]}]}, \"measurement_unit\": \"UNITS\", \"product_variants\": [{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"sku\": \"\", \"depth\": null, \"order\": null, \"height\": null, \"length\": null, \"weight\": null, \"barcode\": \"\", \"product_variant_prices\": [{\"id\": \"00000000-0000-4000-8000-0000000000ff\", \"price\": 100000, \"chain_id\": \"00000000-0000-4000-8000-0000000000ff\", \"price_type\": \"CLIENT\"}], \"product_variant_attributes\": []}], \"seo_image_file_id\": null, \"product_attributes\": [], \"listing_variant_ids\": [\"00000000-0000-4000-8000-0000000000ff\"], \"product_related_products\": []}]",
         "category_list": null,
         "attribute_list": null,
         "filters": {
@@ -32,8 +32,8 @@
           ],
           "colors": [],
           "priceRange": {
-            "max": 2399000,
-            "min": 2399000
+            "max": 100000,
+            "min": 100000
           }
         },
         "brands": [],

@@ -21,10 +21,19 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # A newer deploy supersedes one already in flight — the freshest content wins
-  # and two jobs can never race to write the same bucket.
+  # Queued, never cancelled.
+  #
+  # The upload below runs in two phases, and between them the bucket holds new
+  # assets beside old pages that reference assets the first phase just deleted.
+  # The second phase repairs that seconds later — unless the run is cancelled,
+  # in which case the storefront serves pages pointing at files that no longer
+  # exist until someone publishes again.
+  #
+  # Superseding sounds right ("freshest content wins") and is the thing that
+  # breaks it. Publishing is deliberate and infrequent, so a queued run costs a
+  # minute; a torn bucket costs sales until somebody notices.
   group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -49,6 +58,19 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+
+      # Next's own cache, which setup-node's pnpm cache does not cover. Without
+      # it every build starts from nothing and logs "No build cache found" —
+      # and build time is the whole cost of publishing, since a static export
+      # regenerates every page whatever changed.
+      - name: Cache the Next build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**', 'next.config.ts') }}
+          restore-keys: |
+            next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            next-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -81,10 +103,14 @@ jobs:
       # at the edge for long, or a publish would not be visible until the TTL
       # expired. Order matters: assets first, so a freshly uploaded page never
       # references a chunk that has not landed yet.
+      # No --delete here, unlike the HTML phase below. Removing an asset that
+      # the currently-served pages still reference breaks the live site for the
+      # length of the next step, and for good if this run does not reach it.
+      # Orphaned chunks are hashed, never requested again, and cost pennies of
+      # storage; prune them out of band if it ever matters.
       - name: Upload immutable assets
         run: |
           aws s3 sync out/ "s3://${{ vars.AWS_S3_BUCKET }}/" \
-            --delete \
             --exclude "*.html" \
             --exclude "*.json" \
             --cache-control "public,max-age=31536000,immutable"

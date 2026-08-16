@@ -20,7 +20,7 @@
     "verify": "pnpm typecheck && pnpm check && pnpm lint"
   },
   "dependencies": {
-    "@bacano/sdk": "^1.0.1",
+    "@bacano/sdk": "^1.1.0",
     "@clerk/localizations": "^4.13.3",
     "@clerk/react": "^6.12.3",
     "next": "16.2.4",

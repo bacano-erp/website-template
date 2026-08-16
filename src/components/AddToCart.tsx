@@ -1,6 +1,6 @@
 "use client";
 
-import { useAvailability, useCart } from "@bacano/sdk/react";
+import { useCart, useProductLiveState } from "@bacano/sdk/react";
 import { useState } from "react";
 
 /**
@@ -12,7 +12,9 @@ import { useState } from "react";
  * on every view.
  */
 export function AddToCart({ productVariantId }: { productVariantId: string }) {
-  const { data: availability, loading: checkingStock } = useAvailability([
+  // Same request LivePrice makes, and the same hook: stock and price come back
+  // together, so the page pays for one round trip rather than two.
+  const { data: liveState, loading: checkingStock } = useProductLiveState([
     productVariantId,
   ]);
   const { cart, addItem, getOrCreate } = useCart();
@@ -21,7 +23,7 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
   const [added, setAdded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const stock = availability?.[0];
+  const stock = liveState?.[0];
   const inStock = stock?.inStock ?? false;
 
   async function handleAdd() {
@@ -70,7 +72,7 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
   if (!inStock) {
     return (
       <p className="rounded bg-neutral-100 px-4 py-3 text-neutral-600 text-sm">
-        {stock?.label ?? "Agotado"}
+        {stock?.availabilityLabel ?? "Agotado"}
       </p>
     );
   }

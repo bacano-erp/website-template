@@ -74,17 +74,43 @@ Everything here ships to the browser. Only `NEXT_PUBLIC_*` values exist. A Clerk
 *publishable* key is fine; a Clerk **secret** key never belongs here. If a task
 seems to require a secret key, that task cannot be done in this repo.
 
-### 5. Do not edit `.github/workflows/deploy.yml`
+### 5. This repository is public — including what you write *about* a change
+
+Everything here is world-readable: the code, the commit messages, and the pull
+request title and body. The last of those is the easiest to forget, because it
+is the surface nobody reviews with the care they give a diff — and it is
+published the moment you press the button.
+
+So, in code, commits, and pull request text alike:
+
+| Never | Instead |
+|---|---|
+| A customer's or store's name | "a store already in production" |
+| A link to a private repository | describe what it does, not where it is |
+| A customer's domain | `example.com`, or the role it plays |
+| Internal hosts, IPs, AWS account ids, zone ids | omit, or use documentation ranges |
+| Real catalogue data in fixtures | neutral values (see `tests/fixtures/`) |
+
+The technical argument always survives the translation. "Three shipped stores
+converged on this shape" is as strong as naming them, and it is the part a
+reader actually needs.
+
+`pnpm check:disclosure` enforces the mechanical half — secrets by shape,
+non-Bacano repository links, unknown hosts, account and zone ids — over the
+diff, the commit messages and the pull request text. It runs in CI. It cannot
+judge whether a sentence identifies a customer; that part is yours.
+
+### 6. Do not edit `.github/workflows/deploy.yml`
 
 It is managed by Bacano and its configuration is injected as repository
 variables. Changing it will break publishing. `ci.yml` is likewise standard.
 
-### 6. Dynamic routes need `generateStaticParams`
+### 7. Dynamic routes need `generateStaticParams`
 
 A static export cannot render a path that was not enumerated at build time. See
 `src/app/producto/[slug]/page.tsx`.
 
-### 7. Keep `trailingSlash: true`
+### 8. Keep `trailingSlash: true`
 
 S3 serves `/about/index.html` for `/about/` but 404s for `/about`. Turning this
 off produces links that work in `next dev` and 404 in production — the worst

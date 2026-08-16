@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getBuildClient } from "@/lib/bacano";
+import { getStaticProducts } from "@/lib/static-catalog";
 
 // Required under `output: export`: Next treats a route handler as dynamic
 // unless told otherwise, and refuses to export one. This file only reads
@@ -25,23 +25,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   ).replace(/\/+$/, "");
 
-  const client = await getBuildClient();
-  const slugs: string[] = [];
-  const pageSize = 100;
-  const maxPages = 50;
-
-  for (let page = 0; page < maxPages; page++) {
-    const { entries, pagination } = await client.catalog.getProductSeoEntries({
-      limit: pageSize,
-      offset: page * pageSize,
-    });
-
-    for (const entry of entries) {
-      if (entry.slug) slugs.push(entry.slug);
-    }
-
-    if (!pagination.hasMore) break;
-  }
+  // Same snapshot the pages were generated from, so the sitemap cannot list a
+  // URL that was never built — or miss one that was.
+  const products = await getStaticProducts();
+  const slugs = products
+    .map((product) => product.slug)
+    .filter((slug): slug is string => Boolean(slug));
 
   return [
     { url: `${siteUrl}/`, changeFrequency: "daily", priority: 1 },

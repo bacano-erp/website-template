@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
-import { getBuildClient } from "@/lib/bacano";
+import { getStaticProducts } from "@/lib/static-catalog";
 
 // Server Component: this runs at build time, so the products below are baked
 // into index.html and are visible to crawlers with no JavaScript.
 export default async function HomePage() {
-  const client = await getBuildClient();
-  const products = await client.catalog.getProducts({ limit: 8 });
+  const products = (await getStaticProducts()).slice(0, 8);
 
   return (
     <>

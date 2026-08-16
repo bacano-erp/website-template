@@ -26,6 +26,13 @@ import { formatPrice } from "@/lib/bacano";
  *   client.checkout.createPaymentSession(...) // hosted payment redirect
  *   useCheckout().checkout({...})             // submit the order
  *
+ * The return trip is already built. Pass `buildPaymentReturnUrl()` as the
+ * `returnUrl` of `createPaymentSession`, and `/pago/respuesta/` reconciles the
+ * gateway's answer, waits for payment to settle and sends the shopper to
+ * `/pedido/`. Do not invent a different return path: those two pages are the
+ * only thing standing between a redirect and a shopper who has no idea whether
+ * they paid.
+ *
  * Two rules that are not negotiable:
  *   1. Never collect card details in this app. Use the provider's hosted
  *      fields or redirect, so card data never touches the storefront and PCI

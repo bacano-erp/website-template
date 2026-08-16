@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ProductCard } from "@/components/ProductCard";
-import { getBuildClient } from "@/lib/bacano";
+import { getStaticCatalog } from "@/lib/static-catalog";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -8,8 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CatalogPage() {
-  const client = await getBuildClient();
-  const products = await client.catalog.getProducts({ limit: 250 });
+  // `initialPage` is the first catalogue page the snapshot was built with,
+  // already ordered and filtered the way the store is configured.
+  const { initialPage } = await getStaticCatalog();
+  const products = initialPage.products;
 
   return (
     <>

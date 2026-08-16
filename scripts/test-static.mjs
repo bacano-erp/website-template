@@ -1,0 +1,134 @@
+#!/usr/bin/env node
+/**
+ * Builds the storefront against a fake API, serves the export, runs the tests.
+ *
+ * The tests have to assert on the artifact that actually ships — the HTML in
+ * `out/`, not a dev server — because everything this template gets wrong lives
+ * in the gap between them: a page that renders in `next dev` and 404s on S3, a
+ * price that only appears after hydration, a private page that reaches the
+ * sitemap.
+ *
+ * The API is a fixture rather than the real gateway so CI needs no
+ * credentials, no network and no store. That is also why the fixtures are
+ * recorded from a real response shape: a handwritten mock would drift from the
+ * gateway and the tests would pass against a fiction.
+ */
+import { spawn } from "node:child_process";
+import { createReadStream, existsSync, readFileSync } from "node:fs";
+import { createServer } from "node:http";
+import { extname, join, resolve } from "node:path";
+
+// Not 4190: that is `managesieve`, which the fetch spec lists as a blocked
+// port, so Node refuses to connect to it while curl happily does. The build
+// talks to this through fetch.
+const API_PORT = 4191;
+const SITE_PORT = 4173;
+const SITE_URL = `http://localhost:${SITE_PORT}`;
+const OUT_DIR = resolve("out");
+
+const MIME = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".svg": "image/svg+xml",
+  ".xml": "application/xml",
+  ".txt": "text/plain",
+  ".webp": "image/webp",
+  ".ico": "image/x-icon",
+};
+
+/**
+ * Serves `out/` the way a static host does — including the part that matters:
+ * an unknown path is a 404 with the 404 page's body, not a rewrite to
+ * index.html. A dev server that rewrites would hide exactly the bug this
+ * template shipped before (`trailingSlash` and directory indexes).
+ */
+const site = createServer((req, res) => {
+  const url = new URL(req.url ?? "/", SITE_URL);
+  const candidates = [
+    join(OUT_DIR, url.pathname),
+    join(OUT_DIR, url.pathname, "index.html"),
+    join(OUT_DIR, `${url.pathname}.html`),
+  ];
+
+  const file = candidates.find((c) => existsSync(c) && extname(c) !== "");
+
+  if (!file) {
+    const notFound = join(OUT_DIR, "404.html");
+    res.writeHead(404, { "content-type": MIME[".html"] });
+    res.end(existsSync(notFound) ? readFileSync(notFound) : "Not found");
+    return;
+  }
+
+  res.writeHead(200, {
+    "content-type": MIME[extname(file)] ?? "application/octet-stream",
+  });
+  createReadStream(file).pipe(res);
+});
+
+/** Polls until the mock API accepts connections, so the build never races it. */
+async function waitForPort(port) {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    try {
+      await fetch(`http://localhost:${port}/`, { method: "POST", body: "{}" });
+      return;
+    } catch {
+      await new Promise((done) => setTimeout(done, 100));
+    }
+  }
+  throw new Error(`mock API never came up on ${port}`);
+}
+
+function run(command, args, env) {
+  return new Promise((resolveRun, rejectRun) => {
+    const child = spawn(command, args, {
+      stdio: "inherit",
+      env: { ...process.env, ...env },
+    });
+    child.on("exit", (code) =>
+      code === 0
+        ? resolveRun()
+        : rejectRun(new Error(`${command} exited ${code}`)),
+    );
+  });
+}
+
+async function main() {
+  // Its own process, so the build's workers connect to a plain listening port
+  // rather than one shared with the process that spawned them.
+  const mockApi = spawn("node", ["scripts/mock-api.mjs"], {
+    stdio: ["ignore", "ignore", "inherit"],
+    env: { ...process.env, MOCK_API_PORT: String(API_PORT) },
+  });
+
+  await waitForPort(API_PORT);
+
+  await run("pnpm", ["exec", "next", "build"], {
+    NEXT_PUBLIC_BACANO_API_URL: `http://localhost:${API_PORT}`,
+    NEXT_PUBLIC_BACANO_WEBSITE_SLUG: "tienda-de-ejemplo",
+    NEXT_PUBLIC_SITE_URL: SITE_URL,
+    NEXT_PUBLIC_SITE_NAME: "Tienda de ejemplo",
+    // Empty on purpose: most stores are provisioned without buyer accounts,
+    // and that is the configuration most likely to break.
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "",
+    // Keeps the catalogue snapshot from being reused across runs.
+    BACANO_BUILD_ID: `test-${Date.now()}`,
+  });
+
+  site.listen(SITE_PORT);
+
+  try {
+    await run("pnpm", ["exec", "playwright", "test"], {
+      PLAYWRIGHT_BASE_URL: SITE_URL,
+    });
+  } finally {
+    mockApi.kill();
+    site.close();
+  }
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});

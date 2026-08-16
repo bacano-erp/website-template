@@ -87,12 +87,26 @@ src/
 │   ├── page.tsx                Home — build time
 │   ├── catalogo/page.tsx       Catalogue — build time
 │   ├── producto/[slug]/        Product detail — build time + generateStaticParams
-│   └── carrito/page.tsx        Cart — fully client-side
+│   ├── carrito/page.tsx        Cart — fully client-side
+│   ├── checkout/page.tsx       Checkout scaffold — finish this per store
+│   ├── pago/respuesta/         Payment return — reconciles and waits for payment
+│   └── pedido/page.tsx         Order detail for guests, by token
 ├── components/
 │   ├── ProductCard.tsx         Static
-│   └── AddToCart.tsx           Live island: stock + cart
-└── lib/bacano.ts               Build-time client + price formatting
+│   ├── AddToCart.tsx           Live island: stock + cart
+│   ├── LivePrice.tsx           Live island: price + discount
+│   ├── PaymentReturn.tsx       Gateway return handling
+│   └── OrderDetail.tsx         Public order lookup
+├── config/bacano-lists.ts      Which category/attribute lists this store builds from
+└── lib/
+    ├── bacano.ts               Build-time client, browser client, price formatting
+    ├── static-catalog.ts       Whole catalogue in one read, shared across the build
+    └── order-return.ts         Return URL, gateway params, order storage
 ```
+
+**Before the first build**, set the two list keys in `config/bacano-lists.ts` to the
+ones this website uses in the ERP (Sitios web → Listas de categorías / de atributos).
+They decide which categories and filters the site is generated with.
 
 Server Components here run **at build time only** — there is no server at runtime. Anything needing live data must be a client component.
 

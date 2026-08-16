@@ -5,8 +5,11 @@ import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/AddToCart";
 import { LivePrice } from "@/components/LivePrice";
 import { Markdown } from "@/components/Markdown";
-import { getBuildClient } from "@/lib/bacano";
 import { toPlainText } from "@/lib/markdown";
+import {
+  getStaticProductBySlug,
+  getStaticProducts,
+} from "@/lib/static-catalog";
 
 type Params = { slug: string };
 
@@ -16,34 +19,15 @@ const EMPTY_CATALOG_SLUG = "sin-productos";
  * Enumerates every product page to generate. `output: 'export'` requires this
  * for dynamic segments — a slug missing here simply will not exist on the site.
  *
- * Paginates because `getProductSeoEntries` caps each request; the loop is
- * bounded so a pagination bug cannot hang the build forever.
+ * Reads the build snapshot rather than paging the SEO endpoint, so the whole
+ * catalogue costs a handful of requests for the entire build instead of one
+ * per page. See `lib/static-catalog.ts`.
  */
 export async function generateStaticParams(): Promise<Params[]> {
-  const client = await getBuildClient();
-  const params: Params[] = [];
-  const pageSize = 100;
-  const maxPages = 50; // 5,000 products — far beyond expected catalogue sizes
-
-  for (let page = 0; page < maxPages; page++) {
-    const { entries, pagination } = await client.catalog.getProductSeoEntries({
-      limit: pageSize,
-      offset: page * pageSize,
-    });
-
-    for (const entry of entries) {
-      if (entry.slug) params.push({ slug: entry.slug });
-    }
-
-    if (!pagination.hasMore) break;
-
-    if (page === maxPages - 1) {
-      console.warn(
-        `[bacano] Stopped at ${params.length} products (page cap reached). ` +
-          `Raise maxPages in producto/[slug]/page.tsx or pages will be missing.`,
-      );
-    }
-  }
+  const products = await getStaticProducts();
+  const params = products
+    .filter((product) => Boolean(product.slug))
+    .map((product) => ({ slug: product.slug as string }));
 
   // Next refuses a dynamic route with an empty param list under
   // `output: export`, reporting it as a missing generateStaticParams(). An
@@ -61,8 +45,7 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const client = await getBuildClient();
-  const product = await client.catalog.getProductBySlug(slug);
+  const product = await getStaticProductBySlug(slug);
   if (!product) return {};
 
   const image = product.seoImage ?? getPrimaryProductImage(product.media);
@@ -90,8 +73,7 @@ export default async function ProductPage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
-  const client = await getBuildClient();
-  const product = await client.catalog.getProductBySlug(slug);
+  const product = await getStaticProductBySlug(slug);
 
   if (!product) notFound();
 

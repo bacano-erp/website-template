@@ -40,6 +40,15 @@ jobs:
       - name: ESLint (Next.js rules)
         run: pnpm lint
 
-      # A build here would need live Bacano credentials, so CI stops at the
-      # checks that do not. The real build runs in deploy.yml, which has the
-      # repository variables — and it fails loudly if `out/` is missing.
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Builds against recorded fixtures and asserts on the exported HTML — the
+      # artifact that actually ships. Needs no credentials and no store.
+      - name: End-to-end (static export)
+        run: pnpm test:e2e
+
+      # The end-to-end step above builds against recorded fixtures, so it
+      # proves the export is well-formed without credentials. The build that
+      # ships runs in deploy.yml against the real gateway, with the repository
+      # variables — and it fails loudly if `out/` is missing.

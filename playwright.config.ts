@@ -5,7 +5,7 @@ import { defineConfig } from "@playwright/test";
  * dev server: these tests exist to check the artifact that ships.
  */
 export default defineConfig({
-  testDir: "./tests/e2e",
+  testDir: "./tests",
   fullyParallel: true,
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:4173",

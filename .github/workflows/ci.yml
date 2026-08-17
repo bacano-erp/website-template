@@ -40,6 +40,11 @@ jobs:
       - name: ESLint (Next.js rules)
         run: pnpm lint
 
+      # This repository is public, including the parts nobody reviews: commit
+      # messages, and the pull request title and body. Checks all three.
+      - name: Public disclosure guard
+        run: node scripts/check-disclosure.mjs
+
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 

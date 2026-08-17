@@ -10,6 +10,7 @@
   "scripts": {
     "build": "next build",
     "check": "biome check .",
+    "check:disclosure": "node scripts/check-disclosure.mjs",
     "check:fix": "biome check --write .",
     "dev": "next dev",
     "format": "biome format --write .",
@@ -18,7 +19,7 @@
     "start": "npx serve@latest out",
     "test:e2e": "node scripts/test-static.mjs",
     "typecheck": "tsc --noEmit",
-    "verify": "pnpm typecheck && pnpm check && pnpm lint"
+    "verify": "pnpm typecheck && pnpm check && pnpm lint && pnpm check:disclosure"
   },
   "dependencies": {
     "@bacano/sdk": "^1.1.0",

@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { cpSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 // The guard is plain JS on purpose: no dependency, runnable by `node` alone.
 import { findings } from "../../scripts/check-disclosure.mjs";
@@ -133,5 +137,39 @@ test.describe("what must not be flagged, or the guard gets ignored", () => {
   test("an empty or missing body", () => {
     expect(flagged("")).toBe(false);
     expect(findings(null, "sample")).toEqual([]);
+  });
+});
+
+test.describe("running it as a command", () => {
+  test("reports something wherever the repository is checked out", () => {
+    // It used to compare `import.meta.url` against a hand-built `file://` URL,
+    // so any path needing encoding — a single space is enough, and macOS home
+    // directories often have one — made the comparison fail. The guard then
+    // exited 0 having done nothing, which reads exactly like success.
+    const directory = mkdtempSync(join(tmpdir(), "bacano guard "));
+
+    try {
+      cpSync(
+        resolve("scripts/check-disclosure.mjs"),
+        join(directory, "check.mjs"),
+      );
+
+      const output = execFileSync(
+        process.execPath,
+        [join(directory, "check.mjs")],
+        {
+          encoding: "utf8",
+          cwd: directory,
+        },
+      );
+
+      // Outside a repository there is nothing to scan, but it must still say so
+      // rather than exit silently.
+      expect(output).toMatch(
+        /No disclosure risks found|scanning the whole tree/,
+      );
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });

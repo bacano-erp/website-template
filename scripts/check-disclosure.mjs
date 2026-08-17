@@ -15,7 +15,9 @@
  * Usage: `node scripts/check-disclosure.mjs`, or `pnpm check:disclosure`.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /**
  * Hosts a public storefront template is expected to mention: Bacano's own
@@ -165,13 +167,6 @@ function tryGit(args) {
   }
 }
 
-function git(args) {
-  return execFileSync("git", args, {
-    encoding: "utf8",
-    maxBuffer: 32 * 1024 * 1024,
-  });
-}
-
 function has(ref) {
   return tryGit(["rev-parse", "--verify", "--quiet", ref]) !== null;
 }
@@ -262,7 +257,8 @@ function main() {
         "commit message",
       ),
     );
-    for (const file of git(["ls-files"]).split("\n").filter(Boolean)) {
+    const tracked = (tryGit(["ls-files"]) ?? "").split("\n").filter(Boolean);
+    for (const file of tracked) {
       try {
         problems.push(...findings(readFileSync(file, "utf8"), file));
       } catch {
@@ -303,7 +299,29 @@ function main() {
   process.exit(1);
 }
 
-// Only when run as a command. Importing this from a test must not scan the repo.
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
-  main();
+/**
+ * Only when run as a command: importing this from a test must not scan the repo.
+ *
+ * Compared as resolved paths, not by string-building a `file://` URL. A path
+ * needing any encoding — a space is enough, and macOS home directories often
+ * have one — made that comparison fail, and the guard then exited 0 having done
+ * nothing at all. A check that silently disables itself based on where the
+ * repository was cloned is worse than no check.
+ */
+function samePath(a, b) {
+  try {
+    // Through symlinks: Node resolves a module URL to its real path, while
+    // argv[1] is whatever the shell passed. On macOS a temporary directory is
+    // `/var/folders/...` pointing at `/private/var/folders/...`, so comparing
+    // the two spellings fails and the guard would once again do nothing.
+    return realpathSync(a) === realpathSync(b);
+  } catch {
+    return resolve(a) === resolve(b);
+  }
 }
+
+const invokedDirectly =
+  process.argv[1] !== undefined &&
+  samePath(process.argv[1], fileURLToPath(import.meta.url));
+
+if (invokedDirectly) main();

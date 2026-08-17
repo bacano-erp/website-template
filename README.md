@@ -53,7 +53,8 @@ Two tools, deliberately — they do different jobs and neither replaces the othe
 | **ESLint** | Next.js-specific rules (`next/core-web-vitals`) that Biome cannot express |
 
 ```bash
-pnpm verify        # typecheck + biome + eslint — what CI runs
+pnpm verify        # fast gate: typecheck + biome + eslint + disclosure guard
+pnpm verify:all    # the above plus the storefront tests — what CI runs
 pnpm check:fix     # auto-fix formatting, imports and class order
 pnpm typecheck
 ```

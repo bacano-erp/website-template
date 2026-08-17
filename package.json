@@ -19,7 +19,8 @@
     "start": "npx serve@latest out",
     "test:e2e": "node scripts/test-static.mjs",
     "typecheck": "tsc --noEmit",
-    "verify": "pnpm typecheck && pnpm check && pnpm lint && pnpm check:disclosure"
+    "verify": "pnpm typecheck && pnpm check && pnpm lint && pnpm check:disclosure",
+    "verify:all": "pnpm verify && pnpm test:e2e"
   },
   "dependencies": {
     "@bacano/sdk": "^1.1.0",

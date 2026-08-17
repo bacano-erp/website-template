@@ -188,7 +188,11 @@ async function main() {
   try {
     await phase({
       fixtures: "tests/fixtures/api.json",
-      specs: ["tests/unit", "tests/e2e/static-storefront.spec.ts"],
+      specs: [
+        "tests/unit",
+        "tests/e2e/static-storefront.spec.ts",
+        "tests/e2e/payment-adverse.spec.ts",
+      ],
       buildId: `test-catalogue-${Date.now()}`,
     });
 

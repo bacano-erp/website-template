@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { cpSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 // The guard is plain JS on purpose: no dependency, runnable by `node` alone.
 import { findings } from "../../scripts/check-disclosure.mjs";
@@ -71,6 +75,17 @@ test.describe("shapes that must never reach a public repository", () => {
     expect(flagged(arn)).toBe(true);
   });
 
+  test("but not the twelve digits at the end of a UUID", () => {
+    // A fixture id like this failed CI once. Twelve digits are an account id
+    // only when they are not a slice of something longer, and a guard that
+    // flags ordinary test data gets switched off.
+    // Even here the digits are assembled: twelve in a row, written out, are a
+    // finding — which is the rule working, not a nuisance.
+    const tail = `${"0".repeat(10)}10`;
+    const uuid = ["00000000", "0000", "4000", "8000", tail].join("-");
+    expect(flagged(`the product ${uuid} exists`)).toBe(false);
+  });
+
   test("a Route 53 hosted zone id", () => {
     expect(flagged(`zone ${zoneId}`)).toBe(true);
   });
@@ -122,5 +137,39 @@ test.describe("what must not be flagged, or the guard gets ignored", () => {
   test("an empty or missing body", () => {
     expect(flagged("")).toBe(false);
     expect(findings(null, "sample")).toEqual([]);
+  });
+});
+
+test.describe("running it as a command", () => {
+  test("reports something wherever the repository is checked out", () => {
+    // It used to compare `import.meta.url` against a hand-built `file://` URL,
+    // so any path needing encoding — a single space is enough, and macOS home
+    // directories often have one — made the comparison fail. The guard then
+    // exited 0 having done nothing, which reads exactly like success.
+    const directory = mkdtempSync(join(tmpdir(), "bacano guard "));
+
+    try {
+      cpSync(
+        resolve("scripts/check-disclosure.mjs"),
+        join(directory, "check.mjs"),
+      );
+
+      const output = execFileSync(
+        process.execPath,
+        [join(directory, "check.mjs")],
+        {
+          encoding: "utf8",
+          cwd: directory,
+        },
+      );
+
+      // Outside a repository there is nothing to scan, but it must still say so
+      // rather than exit silently.
+      expect(output).toMatch(
+        /No disclosure risks found|scanning the whole tree/,
+      );
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });

@@ -116,12 +116,35 @@ async function fetchBootstrap(): Promise<StaticCatalogBootstrap> {
  * identical in all of them or they cannot share the file at all.
  */
 function buildCacheKey(): string {
+  return cacheKeyFor({
+    apiUrl: process.env.NEXT_PUBLIC_BACANO_API_URL ?? "",
+    websiteSlug: process.env.NEXT_PUBLIC_BACANO_WEBSITE_SLUG ?? "",
+    categoryListKey: bacanoListKeys.catalogCategories,
+    attributeListKey: bacanoListKeys.catalogAttributes,
+    maxProducts: STATIC_PRODUCT_LIMIT,
+  });
+}
+
+/**
+ * Exported so a test can pin the shape.
+ *
+ * The point of the test is not the string but the absence of anything that
+ * varies between processes: the bug this replaced put the process start time in
+ * here, and the workers stopped sharing the cache.
+ */
+export function cacheKeyFor(input: {
+  apiUrl: string;
+  websiteSlug: string;
+  categoryListKey: string;
+  attributeListKey: string;
+  maxProducts: number;
+}): string {
   return [
-    process.env.NEXT_PUBLIC_BACANO_API_URL ?? "",
-    process.env.NEXT_PUBLIC_BACANO_WEBSITE_SLUG ?? "",
-    bacanoListKeys.catalogCategories,
-    bacanoListKeys.catalogAttributes,
-    STATIC_PRODUCT_LIMIT,
+    input.apiUrl,
+    input.websiteSlug,
+    input.categoryListKey,
+    input.attributeListKey,
+    input.maxProducts,
   ].join("::");
 }
 
@@ -133,7 +156,7 @@ function buildCacheKey(): string {
  * previous catalogue, and every worker in that run agrees on the value.
  *
  * Locally there is no such marker. Returning null puts the decision on the
- * timestamp instead — see `isFresh`.
+ * timestamp instead — see `isCacheFresh`.
  */
 function buildId(): string | null {
   return process.env.GITHUB_RUN_ID ?? process.env.BACANO_BUILD_ID ?? null;
@@ -148,17 +171,24 @@ function buildId(): string | null {
  */
 const LOCAL_CACHE_TTL_MS = 3 * 60 * 1000;
 
-function isFresh(entry: CacheFile): boolean {
-  const currentBuild = buildId();
-
+/**
+ * Whether a cached snapshot may be reused. Pure, so it can be tested directly.
+ */
+export function isCacheFresh(
+  entry: { buildId: string | null; cachedAt: string },
+  currentBuildId: string | null,
+  now: number,
+): boolean {
   // In CI the build id decides, and nothing else does: a cache written by an
   // earlier run is the previous publish's catalogue.
-  if (currentBuild) return entry.buildId === currentBuild;
+  if (currentBuildId) return entry.buildId === currentBuildId;
 
   // Locally, anything written by an identifiable build belongs to that build.
   if (entry.buildId) return false;
 
-  const age = Date.now() - Date.parse(entry.cachedAt);
+  const age = now - Date.parse(entry.cachedAt);
+
+  // A negative age means the clock moved, not that the entry is new.
   return Number.isFinite(age) && age >= 0 && age < LOCAL_CACHE_TTL_MS;
 }
 
@@ -167,7 +197,9 @@ function readCache(cacheKey: string): StaticCatalogBootstrap | null {
     if (!existsSync(CACHE_FILE)) return null;
     const parsed = JSON.parse(readFileSync(CACHE_FILE, "utf8")) as CacheFile;
     if (parsed.cacheKey !== cacheKey) return null;
-    return isFresh(parsed) ? parsed.bootstrap : null;
+    return isCacheFresh(parsed, buildId(), Date.now())
+      ? parsed.bootstrap
+      : null;
   } catch {
     // A corrupt cache is not a build failure: fetching again is always correct,
     // just slower.

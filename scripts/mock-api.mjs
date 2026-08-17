@@ -25,6 +25,23 @@ const FIXTURES = process.env.MOCK_API_FIXTURES ?? "tests/fixtures/api.json";
 const fixtures = JSON.parse(readFileSync(resolve(FIXTURES), "utf8"));
 
 const server = createServer(async (req, res) => {
+  /**
+   * The storefront is served from another port, so every call the browser makes
+   * is cross-origin — exactly as it is in production, where the gateway
+   * allowlists the store's domain. Without these headers the browser blocks
+   * each request before it is sent, and no test can exercise the runtime path
+   * at all: the pages then fail for a reason that has nothing to do with them.
+   */
+  res.setHeader("access-control-allow-origin", "*");
+  res.setHeader("access-control-allow-headers", "*");
+  res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
   // Names the catalogue this process is serving. The harness runs two phases on
   // one port, and checks this before building: reachable is not the same as
   // "the server I just started", and a stale one answering would build the

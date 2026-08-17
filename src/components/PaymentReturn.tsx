@@ -84,37 +84,60 @@ export function PaymentReturn() {
         }
       }
 
+      // Read once before waiting. Most returns arrive after the provider has
+      // already told Bacano, and answering immediately beats making a shopper
+      // watch a spinner for a poll interval to be told what was already known.
+      const known = await readOrder(client, orderId, token);
+      if (cancelled) return;
+
+      if (known && readPaymentOutcome(known.paymentStatus) !== "pending") {
+        setSettled({
+          status: readPaymentOutcome(known.paymentStatus),
+          orderNumber: known.orderNumber,
+        });
+        return;
+      }
+
       try {
-        const order = await client.orders.waitForPayment({ orderId, token });
+        const order = await client.orders.waitForPayment({
+          orderId,
+          token,
+          // The SDK waits two minutes by default, polling through errors. That
+          // is far too long to leave somebody who may have just been charged
+          // looking at "no cierres esta ventana" with nothing changing. Half a
+          // minute is enough for a gateway that is going to answer; past that,
+          // saying "we are still checking, we will email you" is more useful
+          // than continuing to spin.
+          timeoutMs: 30_000,
+          intervalMs: 2_000,
+        });
         if (cancelled) return;
         setSettled({
           status: readPaymentOutcome(order.paymentStatus),
           orderNumber: order.orderNumber,
         });
       } catch {
-        // waitForPayment gives up after its timeout. That is not a failed
-        // payment — it is an undecided one, and saying "failed" here would
-        // tell a shopper whose card was charged that it was not.
+        // A timeout is an undecided payment, not a failed one: saying "failed"
+        // here would tell a shopper whose card was charged that it was not.
         if (cancelled) return;
 
-        try {
-          const order = await client.orders.getPublicOrder({ orderId, token });
-          if (cancelled) return;
-          setSettled(
-            order
-              ? {
-                  status: readPaymentOutcome(order.paymentStatus),
-                  orderNumber: order.orderNumber,
-                }
-              : { status: "pending", orderNumber: null },
-          );
-        } catch {
-          if (!cancelled) setSettled({ status: "pending", orderNumber: null });
-        }
+        const last = await readOrder(client, orderId, token);
+        if (cancelled) return;
+
+        setSettled({
+          status: last ? readPaymentOutcome(last.paymentStatus) : "pending",
+          orderNumber: last?.orderNumber ?? known?.orderNumber ?? null,
+        });
       }
     };
 
-    void settle();
+    // Every failure has to end in a verdict. Reaching the API can fail before
+    // any of the calls below — an unreachable gateway, a store whose API URL is
+    // wrong — and an unhandled rejection here left the page on "no cierres esta
+    // ventana" for as long as the shopper was willing to look at it.
+    void settle().catch(() => {
+      if (!cancelled) setSettled({ status: "pending", orderNumber: null });
+    });
 
     return () => {
       cancelled = true;
@@ -154,6 +177,19 @@ export function PaymentReturn() {
       </div>
     </section>
   );
+}
+
+/** One order read that never throws — absent is an answer this page can use. */
+async function readOrder(
+  client: Awaited<ReturnType<typeof getBrowserClient>>,
+  orderId: string,
+  token: string,
+) {
+  try {
+    return await client.orders.getPublicOrder({ orderId, token });
+  } catch {
+    return null;
+  }
 }
 
 const MESSAGES: Record<Display, { title: string; body: string }> = {

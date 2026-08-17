@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { requireSiteUrl } from "@/lib/site-url";
 import { getStaticProducts } from "@/lib/static-catalog";
 
 // Required under `output: export`: Next treats a route handler as dynamic
@@ -21,9 +22,7 @@ export const dynamic = "force-static";
  * runs in a build that must terminate.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  ).replace(/\/+$/, "");
+  const siteUrl = requireSiteUrl();
 
   // Same snapshot the pages were generated from, so the sitemap cannot list a
   // URL that was never built — or miss one that was.

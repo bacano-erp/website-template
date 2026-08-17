@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { requireSiteUrl } from "@/lib/site-url";
 import { Providers } from "./providers";
 import "./globals.css";
 
-// `||` not `??`: an unset GitHub Actions variable arrives as an empty string,
-// which `??` passes straight through — and `new URL("")` throws "Invalid URL"
-// somewhere unrelated, giving no hint that SITE_URL is what's missing.
+// A missing name is cosmetic, so it has a default. A missing URL is not — see
+// `requireSiteUrl`, which stops the build rather than publish canonical tags
+// pointing at localhost.
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "Bacano Store";
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = requireSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

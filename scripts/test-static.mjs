@@ -94,36 +94,66 @@ function run(command, args, env) {
   });
 }
 
-async function main() {
-  // Its own process, so the build's workers connect to a plain listening port
-  // rather than one shared with the process that spawned them.
+/**
+ * One build, one set of specs, against one catalogue.
+ *
+ * Run twice: a store with products, and a store with none. The empty case is
+ * not an edge case — it is every store on its first day, and the state that has
+ * broken this template twice.
+ */
+async function phase({ fixtures, specs, buildId }) {
+  console.error(`\n=== ${fixtures} ===`);
+
   const mockApi = spawn("node", ["scripts/mock-api.mjs"], {
     stdio: ["ignore", "ignore", "inherit"],
-    env: { ...process.env, MOCK_API_PORT: String(API_PORT) },
+    env: {
+      ...process.env,
+      MOCK_API_PORT: String(API_PORT),
+      MOCK_API_FIXTURES: fixtures,
+    },
   });
-
-  await waitForPort(API_PORT);
-
-  await run("pnpm", ["exec", "next", "build"], {
-    NEXT_PUBLIC_BACANO_API_URL: `http://localhost:${API_PORT}`,
-    NEXT_PUBLIC_BACANO_WEBSITE_SLUG: "tienda-de-ejemplo",
-    NEXT_PUBLIC_SITE_URL: SITE_URL,
-    NEXT_PUBLIC_SITE_NAME: "Tienda de ejemplo",
-    // Empty on purpose: most stores are provisioned without buyer accounts,
-    // and that is the configuration most likely to break.
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "",
-    // Keeps the catalogue snapshot from being reused across runs.
-    BACANO_BUILD_ID: `test-${Date.now()}`,
-  });
-
-  site.listen(SITE_PORT);
 
   try {
-    await run("pnpm", ["exec", "playwright", "test"], {
+    await waitForPort(API_PORT);
+
+    await run("pnpm", ["exec", "next", "build"], {
+      NEXT_PUBLIC_BACANO_API_URL: `http://localhost:${API_PORT}`,
+      NEXT_PUBLIC_BACANO_WEBSITE_SLUG: "tienda-de-ejemplo",
+      NEXT_PUBLIC_SITE_URL: SITE_URL,
+      NEXT_PUBLIC_SITE_NAME: "Tienda de ejemplo",
+      // Empty on purpose: most stores are provisioned without buyer accounts,
+      // and that is the configuration most likely to break.
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "",
+      // Distinct per phase, so the second build cannot serve the first one's
+      // catalogue out of `.next/cache`.
+      BACANO_BUILD_ID: buildId,
+    });
+
+    await run("pnpm", ["exec", "playwright", "test", ...specs], {
       PLAYWRIGHT_BASE_URL: SITE_URL,
     });
   } finally {
     mockApi.kill();
+  }
+}
+
+async function main() {
+  // Awaited: Playwright must not start against a socket that is not listening.
+  await new Promise((ready) => site.listen(SITE_PORT, ready));
+
+  try {
+    await phase({
+      fixtures: "tests/fixtures/api.json",
+      specs: ["tests/unit", "tests/e2e/static-storefront.spec.ts"],
+      buildId: `test-catalogue-${Date.now()}`,
+    });
+
+    await phase({
+      fixtures: "tests/fixtures/api-empty.json",
+      specs: ["tests/e2e/empty-catalogue.spec.ts"],
+      buildId: `test-empty-${Date.now()}`,
+    });
+  } finally {
     site.close();
   }
 }

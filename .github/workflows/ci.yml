@@ -5,6 +5,11 @@ name: CI
 
 on:
   pull_request:
+    # `edited` matters as much as the code events: the disclosure guard reads the
+    # pull request title and body, and the default set omits it — so a
+    # description edited after opening would never be checked, which is the
+    # easiest way to publish something by accident.
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
 

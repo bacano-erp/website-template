@@ -116,7 +116,8 @@ async function main() {
     BACANO_BUILD_ID: `test-${Date.now()}`,
   });
 
-  site.listen(SITE_PORT);
+  // Awaited: Playwright must not start against a socket that is not listening.
+  await new Promise((ready) => site.listen(SITE_PORT, ready));
 
   try {
     await run("pnpm", ["exec", "playwright", "test"], {

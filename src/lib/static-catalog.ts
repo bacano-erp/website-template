@@ -32,6 +32,8 @@ const CACHE_FILE = resolve(".next/cache/bacano-static-catalog.json");
 
 type CacheFile = {
   cacheKey: string;
+  /** The build that wrote it, when the environment names one. */
+  buildId: string | null;
   cachedAt: string;
   bootstrap: StaticCatalogBootstrap;
 };
@@ -44,6 +46,12 @@ type CacheFile = {
  * be fetched several times. The file under `.next/cache` is what the workers
  * share; the in-flight promise is what stops one worker from starting the same
  * fetch twice before it lands.
+ *
+ * For the file to be shared, every value in its key must be identical in every
+ * worker. An earlier version mixed the process start time into the key, so
+ * workers that started in different seconds each fetched the whole catalogue
+ * and then overwrote the file for the others — the cache appeared to work only
+ * because a small catalogue finishes before the clock ticks.
  */
 let inFlight: {
   cacheKey: string;
@@ -101,12 +109,11 @@ async function fetchBootstrap(): Promise<StaticCatalogBootstrap> {
 }
 
 /**
- * Everything that would make a cached snapshot the wrong answer.
+ * What the snapshot is *of* — the store, and the lists it was built from.
  *
- * The build id is what separates one publish from the next: without it a
- * rebuild triggered by a product change would happily serve the previous
- * catalogue out of `.next/cache` and publish a site with none of the edits
- * that caused it.
+ * Deliberately free of anything that varies between processes. Next builds
+ * routes in several worker processes, and every value in this key has to be
+ * identical in all of them or they cannot share the file at all.
  */
 function buildCacheKey(): string {
   return [
@@ -115,29 +122,52 @@ function buildCacheKey(): string {
     bacanoListKeys.catalogCategories,
     bacanoListKeys.catalogAttributes,
     STATIC_PRODUCT_LIMIT,
-    buildId(),
   ].join("::");
 }
 
 /**
- * GitHub sets `GITHUB_RUN_ID` on every run, including the republish of an
- * unchanged commit. Locally there is no such marker, so fall back to the
- * process start time — a `next build` is one process, and a second build is a
- * second process with a later value.
+ * Which build wrote the cache, when the environment can say so.
+ *
+ * GitHub sets `GITHUB_RUN_ID` on every run, including a republish of an
+ * unchanged commit, so in CI this is exact: a new publish never reuses the
+ * previous catalogue, and every worker in that run agrees on the value.
+ *
+ * Locally there is no such marker. Returning null puts the decision on the
+ * timestamp instead — see `isFresh`.
  */
-function buildId(): string {
-  return (
-    process.env.GITHUB_RUN_ID ??
-    process.env.BACANO_BUILD_ID ??
-    String(Math.floor(Date.now() / 1000) - Math.floor(process.uptime()))
-  );
+function buildId(): string | null {
+  return process.env.GITHUB_RUN_ID ?? process.env.BACANO_BUILD_ID ?? null;
+}
+
+/**
+ * How long a snapshot may be reused when no build id is available.
+ *
+ * Only reached in local development. Long enough to cover one `next build`
+ * across its workers, short enough that the next `pnpm build` after an edit
+ * fetches again.
+ */
+const LOCAL_CACHE_TTL_MS = 3 * 60 * 1000;
+
+function isFresh(entry: CacheFile): boolean {
+  const currentBuild = buildId();
+
+  // In CI the build id decides, and nothing else does: a cache written by an
+  // earlier run is the previous publish's catalogue.
+  if (currentBuild) return entry.buildId === currentBuild;
+
+  // Locally, anything written by an identifiable build belongs to that build.
+  if (entry.buildId) return false;
+
+  const age = Date.now() - Date.parse(entry.cachedAt);
+  return Number.isFinite(age) && age >= 0 && age < LOCAL_CACHE_TTL_MS;
 }
 
 function readCache(cacheKey: string): StaticCatalogBootstrap | null {
   try {
     if (!existsSync(CACHE_FILE)) return null;
     const parsed = JSON.parse(readFileSync(CACHE_FILE, "utf8")) as CacheFile;
-    return parsed.cacheKey === cacheKey ? parsed.bootstrap : null;
+    if (parsed.cacheKey !== cacheKey) return null;
+    return isFresh(parsed) ? parsed.bootstrap : null;
   } catch {
     // A corrupt cache is not a build failure: fetching again is always correct,
     // just slower.
@@ -152,6 +182,7 @@ function writeCache(cacheKey: string, bootstrap: StaticCatalogBootstrap): void {
       CACHE_FILE,
       JSON.stringify({
         cacheKey,
+        buildId: buildId(),
         cachedAt: new Date().toISOString(),
         bootstrap,
       } satisfies CacheFile),

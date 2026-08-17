@@ -1,3 +1,5 @@
+import { browserSiteUrl } from "@/lib/site-url";
+
 /**
  * The trip through the payment gateway, and getting the shopper back.
  *
@@ -7,13 +9,15 @@
  * that moment survivable.
  */
 
-/** Where `createPaymentSession` should send the shopper back to. */
+/**
+ * Where `createPaymentSession` should send the shopper back to.
+ *
+ * Runs in the browser, so it can fall back to the origin the shopper is
+ * actually on rather than guessing — see `browserSiteUrl`. Never localhost in a
+ * published store: a gateway sent there loses a shopper who has already paid.
+ */
 export function buildPaymentReturnUrl(): string {
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  ).replace(/\/+$/, "");
-
-  return `${siteUrl}/pago/respuesta/`;
+  return `${browserSiteUrl()}/pago/respuesta/`;
 }
 
 /** The order page for a public (guest) order. */

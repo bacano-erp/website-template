@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { requireSiteUrl } from "@/lib/site-url";
 
 // Required under `output: export`: Next treats a route handler as dynamic
 // unless told otherwise, and refuses to export one. This file only reads
@@ -13,9 +14,7 @@ export const dynamic = "force-static";
  * empty page. Everything else is open — this is a shop.
  */
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  ).replace(/\/+$/, "");
+  const siteUrl = requireSiteUrl();
 
   return {
     rules: {

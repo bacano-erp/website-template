@@ -2,21 +2,17 @@
 /**
  * Stops private information reaching a public repository.
  *
- * This template is public. Its code gets reviewed; its *pull request text* does
- * not, and that is where a customer's name and a link to their private
- * repository once reached the internet. So this reads the same three surfaces a
- * reader of the repo can see: the changed files, the commit messages, and the
- * pull request title and body.
+ * This template is public. Its code gets reviewed; the prose around a change —
+ * commit messages, and the pull request title and body — does not, and it is
+ * published just as widely. So this reads the same three surfaces a stranger
+ * can read: the changed lines, the commit messages, and the pull request text.
  *
- * It is deliberately structural rather than a list of things not to say. A
- * denylist of customer names, in a public repository, would publish the
- * customer names. So instead: known-good hosts are allowlisted, secrets are
- * matched by shape, and anything else that looks like somebody's infrastructure
- * is reported.
+ * It is deliberately structural rather than a list of things not to say. Such a
+ * list, committed here, would itself be the disclosure. So instead: known-good
+ * hosts are allowlisted, secrets are matched by shape, and anything else that
+ * looks like somebody's infrastructure is reported.
  *
- * Usage:
- *   node scripts/check-disclosure.mjs            # staged + unstaged vs main
- *   node scripts/check-disclosure.mjs --ci       # diff, commits and PR text
+ * Usage: `node scripts/check-disclosure.mjs`, or `pnpm check:disclosure`.
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -50,6 +46,8 @@ const ALLOWED_HOSTS = new Set([
   "w3.org",
   "mozilla.org",
   "typescriptlang.org",
+  // Commit trailers carry `noreply@anthropic.com`.
+  "anthropic.com",
 ]);
 
 /** Only this organisation's repositories may be linked by URL. */
@@ -77,16 +75,34 @@ const PUBLIC_IP =
   /\b(?!127\.|0\.0\.0\.0|10\.|192\.168\.|255\.)\d{1,3}(?:\.\d{1,3}){3}\b/;
 
 const HOST = /\bhttps?:\/\/([a-z0-9.-]+\.[a-z]{2,})/gi;
+/**
+ * Hosts written without a scheme, which is how a domain usually appears in
+ * prose: "the store at shop.example.com".
+ *
+ * Two labels are enough. An earlier version required three and therefore missed
+ * exactly the shape it exists to catch. The suffix list is deliberately short:
+ * `.app`, `.co` and `.store` read the same as ordinary property access
+ * (`cart.store`), and those are still caught when written as a URL.
+ */
 const BARE_HOST =
-  /\b([a-z0-9-]+(?:\.[a-z0-9-]+)+\.(?:com|io|co|net|dev|app|shop|store))\b/gi;
-const GITHUB_REPO = /github\.com\/([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)/g;
+  /\b([a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|io|net|dev|shop))\b/gi;
+
+/** Both remote forms: `github.com/<owner>/<repo>` and `git@github.com:<owner>/<repo>`. */
+const GITHUB_REPO = /github\.com[/:]([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)/g;
 
 function registrableDomain(host) {
   const parts = host.toLowerCase().replace(/\.$/, "").split(".");
   return parts.slice(-2).join(".");
 }
 
-function findings(text, where) {
+/**
+ * Everything reportable in one piece of text.
+ *
+ * Exported so the rules can be tested directly — the gaps this once had (a bare
+ * two-label domain, an SSH remote) were invisible until something exercised
+ * them one by one.
+ */
+export function findings(text, where) {
   const found = [];
   if (!text) return found;
 
@@ -269,4 +285,7 @@ function main() {
   process.exit(1);
 }
 
-main();
+// Only when run as a command. Importing this from a test must not scan the repo.
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}

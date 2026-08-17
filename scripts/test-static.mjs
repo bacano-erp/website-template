@@ -14,7 +14,7 @@
  * gateway and the tests would pass against a fiction.
  */
 import { spawn } from "node:child_process";
-import { createReadStream, existsSync, readFileSync } from "node:fs";
+import { createReadStream, existsSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, resolve } from "node:path";
 
@@ -103,6 +103,10 @@ function run(command, args, env) {
  */
 async function phase({ fixtures, specs, buildId }) {
   console.error(`\n=== ${fixtures} ===`);
+
+  // Belt and braces with the per-phase build id: whatever the cache decides,
+  // a phase must never inherit the previous phase's catalogue.
+  rmSync(resolve(".next/cache/bacano-static-catalog.json"), { force: true });
 
   const mockApi = spawn("node", ["scripts/mock-api.mjs"], {
     stdio: ["ignore", "ignore", "inherit"],

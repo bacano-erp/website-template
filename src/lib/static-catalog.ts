@@ -127,8 +127,12 @@ function buildCacheKey(): string {
  */
 function buildId(): string {
   return (
-    process.env.GITHUB_RUN_ID ??
+    // `BACANO_BUILD_ID` first: it is set deliberately, and `GITHUB_RUN_ID` is
+    // ambient. The test harness builds twice inside one CI run and needs each
+    // build to have its own identity — with the ambient value winning, the
+    // second build silently reused the first one's catalogue.
     process.env.BACANO_BUILD_ID ??
+    process.env.GITHUB_RUN_ID ??
     String(Math.floor(Date.now() / 1000) - Math.floor(process.uptime()))
   );
 }

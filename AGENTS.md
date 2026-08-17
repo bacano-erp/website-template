@@ -129,7 +129,9 @@ pnpm dev
 **Before claiming any change is done:**
 
 ```bash
-pnpm verify      # typecheck + biome + eslint — exactly what CI runs
+pnpm verify      # fast gate: typecheck + biome + eslint + disclosure guard
+pnpm test:e2e    # builds twice against fixtures and runs the storefront tests
+pnpm verify:all  # both — this is what CI runs
 ```
 
 To check a change the way production will serve it — which catches

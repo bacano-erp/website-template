@@ -15,9 +15,14 @@ import { createServer } from "node:http";
 import { resolve } from "node:path";
 
 const PORT = Number(process.env.MOCK_API_PORT ?? 4191);
-const fixtures = JSON.parse(
-  readFileSync(resolve("tests/fixtures/api.json"), "utf8"),
-);
+
+/**
+ * Which catalogue to answer with. The empty one is not an edge case: it is what
+ * every store looks like on the day it is provisioned, and the state that has
+ * broken this template before.
+ */
+const FIXTURES = process.env.MOCK_API_FIXTURES ?? "tests/fixtures/api.json";
+const fixtures = JSON.parse(readFileSync(resolve(FIXTURES), "utf8"));
 
 createServer(async (req, res) => {
   let body = "";

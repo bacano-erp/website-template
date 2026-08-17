@@ -1,0 +1,52 @@
+{
+  "ResolveWebsiteBySlug": {
+    "data": {
+      "websites": [
+        {
+          "id": "00000000-0000-4000-8000-0000000000ff",
+          "company_id": "00000000-0000-4000-8000-0000000000ff",
+          "chain_id": "00000000-0000-4000-8000-0000000000ff",
+          "name": "Tienda de ejemplo",
+          "slug": "tienda-de-ejemplo",
+          "domain": "tienda.example.com",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "WebsiteGetCatalogPage": {
+    "data": {
+      "result": {
+        "success": true,
+        "products": "[]",
+        "category_list": null,
+        "attribute_list": null,
+        "filters": {
+          "attributes": [],
+          "brands": [],
+          "categories": [],
+          "colors": [],
+          "priceRange": {
+            "max": 0,
+            "min": 0
+          }
+        },
+        "brands": [],
+        "pagination": {
+          "hasMore": false,
+          "limit": 100,
+          "offset": 0,
+          "total": 0
+        },
+        "applied_filters": {
+          "attributes": {},
+          "attributesBySlug": {},
+          "category": null,
+          "subcategory": null
+        },
+        "debug": null,
+        "errors": []
+      }
+    }
+  }
+}

@@ -151,15 +151,21 @@ export function cacheKeyFor(input: {
 /**
  * Which build wrote the cache, when the environment can say so.
  *
- * GitHub sets `GITHUB_RUN_ID` on every run, including a republish of an
- * unchanged commit, so in CI this is exact: a new publish never reuses the
- * previous catalogue, and every worker in that run agrees on the value.
+ * `BACANO_BUILD_ID` is the deliberate answer, and wins. GitHub's
+ * `GITHUB_RUN_ID` is the fallback: set on every run including a republish of an
+ * unchanged commit, and identical across that run's workers, which is what a
+ * publish needs.
  *
- * Locally there is no such marker. Returning null puts the decision on the
- * timestamp instead — see `isCacheFresh`.
+ * With neither — ordinary local development — this returns null and the
+ * decision moves to the timestamp. See `isCacheFresh`.
  */
 function buildId(): string | null {
-  return process.env.GITHUB_RUN_ID ?? process.env.BACANO_BUILD_ID ?? null;
+  // `BACANO_BUILD_ID` first: it is set deliberately, while `GITHUB_RUN_ID` is
+  // ambient and identical for everything in one CI run. The test harness builds
+  // twice inside a single run and each build needs its own identity — with the
+  // ambient value winning, the second build silently served the first one's
+  // catalogue.
+  return process.env.BACANO_BUILD_ID ?? process.env.GITHUB_RUN_ID ?? null;
 }
 
 /**

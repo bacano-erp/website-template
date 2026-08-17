@@ -67,17 +67,62 @@ const site = createServer((req, res) => {
   createReadStream(file).pipe(res);
 });
 
-/** Polls until the mock API accepts connections, so the build never races it. */
-async function waitForPort(port) {
-  for (let attempt = 0; attempt < 50; attempt++) {
-    try {
-      await fetch(`http://localhost:${port}/`, { method: "POST", body: "{}" });
-      return;
-    } catch {
-      await new Promise((done) => setTimeout(done, 100));
-    }
+/**
+ * Starts the mock and waits for it to say it is serving the right catalogue.
+ *
+ * A handshake on the child's own output rather than a poll of the port. Both
+ * phases use one port, so a leftover server answers exactly like a fresh one —
+ * and polling cannot tell them apart: the probe succeeds a moment before the
+ * real child dies of `EADDRINUSE`, and the phase then builds the previous
+ * catalogue and passes. Only the process we started can print this line.
+ */
+function startMock(fixtures) {
+  const child = spawn("node", ["scripts/mock-api.mjs"], {
+    stdio: ["ignore", "ignore", "pipe"],
+    env: {
+      ...process.env,
+      MOCK_API_PORT: String(API_PORT),
+      MOCK_API_FIXTURES: fixtures,
+    },
+  });
+
+  const ready = new Promise((resolve, reject) => {
+    let buffered = "";
+
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk) => {
+      process.stderr.write(chunk);
+      buffered += chunk;
+      if (buffered.includes(`serving ${fixtures}`)) resolve();
+    });
+
+    child.once("exit", (code) =>
+      reject(
+        new Error(
+          `mock API exited with ${code} before serving ${fixtures} — ` +
+            `usually the port is still held by the previous phase`,
+        ),
+      ),
+    );
+
+    setTimeout(
+      () => reject(new Error(`mock API never served ${fixtures}`)),
+      15_000,
+    ).unref();
+  });
+
+  return { child, ready };
+}
+
+/** Stops a child and waits for it to actually go, so the port is free. */
+function stop(child) {
+  if (child.exitCode !== null || child.signalCode !== null) {
+    return Promise.resolve();
   }
-  throw new Error(`mock API never came up on ${port}`);
+  return new Promise((done) => {
+    child.once("exit", done);
+    child.kill();
+  });
 }
 
 function run(command, args, env) {
@@ -108,17 +153,10 @@ async function phase({ fixtures, specs, buildId }) {
   // a phase must never inherit the previous phase's catalogue.
   rmSync(resolve(".next/cache/bacano-static-catalog.json"), { force: true });
 
-  const mockApi = spawn("node", ["scripts/mock-api.mjs"], {
-    stdio: ["ignore", "ignore", "inherit"],
-    env: {
-      ...process.env,
-      MOCK_API_PORT: String(API_PORT),
-      MOCK_API_FIXTURES: fixtures,
-    },
-  });
+  const { child: mockApi, ready } = startMock(fixtures);
 
   try {
-    await waitForPort(API_PORT);
+    await ready;
 
     await run("pnpm", ["exec", "next", "build"], {
       NEXT_PUBLIC_BACANO_API_URL: `http://localhost:${API_PORT}`,
@@ -137,7 +175,9 @@ async function phase({ fixtures, specs, buildId }) {
       PLAYWRIGHT_BASE_URL: SITE_URL,
     });
   } finally {
-    mockApi.kill();
+    // Awaited: the next phase binds this same port, and a lingering server
+    // would answer for it.
+    await stop(mockApi);
   }
 }
 

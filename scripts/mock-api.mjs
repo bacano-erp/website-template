@@ -24,7 +24,13 @@ const PORT = Number(process.env.MOCK_API_PORT ?? 4191);
 const FIXTURES = process.env.MOCK_API_FIXTURES ?? "tests/fixtures/api.json";
 const fixtures = JSON.parse(readFileSync(resolve(FIXTURES), "utf8"));
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
+  // Names the catalogue this process is serving. The harness runs two phases on
+  // one port, and checks this before building: reachable is not the same as
+  // "the server I just started", and a stale one answering would build the
+  // wrong catalogue without failing anything.
+  res.setHeader("x-mock-fixtures", FIXTURES);
+
   let body = "";
   for await (const chunk of req) body += chunk;
 
@@ -53,4 +59,13 @@ createServer(async (req, res) => {
   if (process.env.MOCK_API_DEBUG) console.error(`[mock-api] ${operation}`);
   res.writeHead(200, { "content-type": "application/json" });
   res.end(JSON.stringify(fixture));
-}).listen(PORT, () => console.error(`[mock-api] listening on ${PORT}`));
+});
+
+// Losing the port means a previous phase's server is still up, and building
+// against it would use the wrong catalogue. Fail rather than let that happen.
+server.on("error", (error) => {
+  console.error(`[mock-api] cannot listen on ${PORT}: ${error.code}`);
+  process.exit(1);
+});
+
+server.listen(PORT, () => console.error(`[mock-api] serving ${FIXTURES}`));

@@ -65,7 +65,10 @@ const SECRET_PATTERNS = [
 ];
 
 const INFRA_PATTERNS = [
-  [/\b\d{12}\b/, "an AWS account id"],
+  // Twelve digits, but not a slice of something longer: the last segment of a
+  // UUID is often twelve digits, and reading a UUID's tail as an account id
+  // makes the guard cry wolf over ordinary test fixtures.
+  [/(?<![0-9a-fA-F-])\d{12}(?![0-9a-fA-F-])/, "an AWS account id"],
   [/\bZ[A-Z0-9]{12,}\b/, "a Route 53 hosted zone id"],
   [/\barn:aws:[a-z0-9-]+:[a-z0-9-]*:\d{12}:/, "an AWS ARN with an account id"],
 ];
@@ -225,6 +228,21 @@ function main() {
     for (const line of diff.split("\n")) {
       if (!line.startsWith("+") || line.startsWith("+++")) continue;
       problems.push(...findings(line.slice(1), "diff"));
+    }
+
+    /**
+     * Work that is not committed yet.
+     *
+     * Without this, running the guard before committing examines the previous
+     * change and reports success about the one you are holding — which is
+     * exactly when somebody runs it, and exactly the false confidence this
+     * whole check exists to remove. `git diff HEAD` covers staged and unstaged
+     * together.
+     */
+    const uncommitted = tryGit(["diff", "HEAD", "--unified=0"]) ?? "";
+    for (const line of uncommitted.split("\n")) {
+      if (!line.startsWith("+") || line.startsWith("+++")) continue;
+      problems.push(...findings(line.slice(1), "uncommitted change"));
     }
 
     // 2. Commit messages, which are published with the code.

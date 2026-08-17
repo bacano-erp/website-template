@@ -12,6 +12,7 @@
     "check": "biome check .",
     "check:disclosure": "node scripts/check-disclosure.mjs",
     "check:fix": "biome check --write .",
+    "check:fixtures": "node scripts/check-fixtures.mjs",
     "dev": "next dev",
     "format": "biome format --write .",
     "format:check": "biome format .",

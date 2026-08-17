@@ -75,6 +75,17 @@ test.describe("shapes that must never reach a public repository", () => {
     expect(flagged(arn)).toBe(true);
   });
 
+  test("but not the twelve digits at the end of a UUID", () => {
+    // A fixture id like this failed CI once. Twelve digits are an account id
+    // only when they are not a slice of something longer, and a guard that
+    // flags ordinary test data gets switched off.
+    // Even here the digits are assembled: twelve in a row, written out, are a
+    // finding — which is the rule working, not a nuisance.
+    const tail = `${"0".repeat(10)}10`;
+    const uuid = ["00000000", "0000", "4000", "8000", tail].join("-");
+    expect(flagged(`the product ${uuid} exists`)).toBe(false);
+  });
+
   test("a Route 53 hosted zone id", () => {
     expect(flagged(`zone ${zoneId}`)).toBe(true);
   });

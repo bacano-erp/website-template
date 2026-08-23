@@ -48,8 +48,11 @@ const ALLOWED_HOSTS = new Set([
   "w3.org",
   "mozilla.org",
   "typescriptlang.org",
-  // Commit trailers carry `noreply@anthropic.com`.
+  // Commit trailers carry `noreply@anthropic.com`, and the pull request
+  // footer links claude.com. Both are public Anthropic hosts, and blocking
+  // them only ever fails a pull request for its own boilerplate.
   "anthropic.com",
+  "claude.com",
 ]);
 
 /** Only this organisation's repositories may be linked by URL. */

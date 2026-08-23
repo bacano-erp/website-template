@@ -59,18 +59,29 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      # Next's own cache, which setup-node's pnpm cache does not cover. Without
-      # it every build starts from nothing and logs "No build cache found" —
-      # and build time is the whole cost of publishing, since a static export
-      # regenerates every page whatever changed.
-      - name: Cache the Next build
+      # The compiler cache only — never the whole of .next/cache.
+      #
+      # Caching compilation is worth it: build time is the whole cost of
+      # publishing, since a static export regenerates every page whatever
+      # changed. But .next/cache also holds Next's fetch cache and this
+      # template's catalogue snapshot, and both are answers from the Bacano API.
+      # The cache key can only hash what is in the repository, and a publish is
+      # triggered precisely when something *outside* the repository changed — so
+      # restoring those would replay the previous build's data and publish a
+      # site that ignores the edit that asked for it. That is not hypothetical:
+      # a production storefront served content its API no longer returned,
+      # because an unchanged key restored a warm cache on every publish.
+      #
+      # Narrow the path rather than vary the key: a key that changed every run
+      # would cache nothing, and one that did not would eventually be wrong.
+      - name: Cache the Next compiler
         uses: actions/cache@v4
         with:
-          path: .next/cache
-          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**', 'next.config.ts') }}
+          path: .next/cache/webpack
+          key: next-webpack-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**', 'next.config.ts') }}
           restore-keys: |
-            next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-            next-${{ runner.os }}-
+            next-webpack-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            next-webpack-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

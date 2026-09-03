@@ -24,7 +24,7 @@
     "verify:all": "pnpm verify && pnpm test:e2e"
   },
   "dependencies": {
-    "@bacano/sdk": "^1.1.0",
+    "@bacano/sdk": "^1.1.18",
     "@clerk/localizations": "^4.13.3",
     "@clerk/react": "^6.12.3",
     "next": "16.2.4",

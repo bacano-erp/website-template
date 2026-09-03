@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import type { Product, StaticCatalogBootstrap } from "@bacano/sdk";
-import { bacanoListKeys } from "@/config/bacano-lists";
 import { getBuildClient } from "@/lib/bacano";
+import { staticCatalogBootstrapOptions } from "@/lib/catalog-request";
 
 /**
  * The whole catalogue, read once per build.
@@ -18,15 +18,6 @@ import { getBuildClient } from "@/lib/bacano";
  * full snapshot, the first renderable catalogue page and its filters, in one
  * consistent read. See STATIC_STOREFRONT_CATALOG_BUILDS.md in the SDK.
  */
-
-/** Products per gateway request while paging the snapshot. */
-const STATIC_PRODUCT_PAGE_SIZE = 100;
-
-/** Products shown on the first catalogue page, before the shopper filters. */
-const STATIC_INITIAL_PAGE_SIZE = 24;
-
-/** Safety ceiling for one build, so a runaway catalogue cannot hang CI. */
-const STATIC_PRODUCT_LIMIT = 10_000;
 
 const CACHE_FILE = resolve(".next/cache/bacano-static-catalog.json");
 
@@ -99,13 +90,9 @@ export async function getStaticProductBySlug(
 async function fetchBootstrap(): Promise<StaticCatalogBootstrap> {
   const client = await getBuildClient();
 
-  return await client.catalog.getStaticCatalogBootstrap({
-    categoryListKey: bacanoListKeys.catalogCategories,
-    attributeListKey: bacanoListKeys.catalogAttributes,
-    pageSize: STATIC_PRODUCT_PAGE_SIZE,
-    initialPageSize: STATIC_INITIAL_PAGE_SIZE,
-    maxProducts: STATIC_PRODUCT_LIMIT,
-  });
+  return await client.catalog.getStaticCatalogBootstrap(
+    staticCatalogBootstrapOptions(),
+  );
 }
 
 /**
@@ -116,12 +103,15 @@ async function fetchBootstrap(): Promise<StaticCatalogBootstrap> {
  * identical in all of them or they cannot share the file at all.
  */
 function buildCacheKey(): string {
+  const options = staticCatalogBootstrapOptions();
   return cacheKeyFor({
     apiUrl: process.env.NEXT_PUBLIC_BACANO_API_URL ?? "",
     websiteSlug: process.env.NEXT_PUBLIC_BACANO_WEBSITE_SLUG ?? "",
-    categoryListKey: bacanoListKeys.catalogCategories,
-    attributeListKey: bacanoListKeys.catalogAttributes,
-    maxProducts: STATIC_PRODUCT_LIMIT,
+    // From the shared request definition, so the cache key cannot describe a
+    // different request than the one actually made.
+    categoryListKey: options.categoryListKey,
+    attributeListKey: options.attributeListKey,
+    maxProducts: options.maxProducts,
   });
 }
 

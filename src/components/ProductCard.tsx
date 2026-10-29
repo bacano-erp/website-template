@@ -31,6 +31,8 @@ export function ProductCard({ product }: { product: Product }) {
             alt={image.alt ?? product.name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
+            // See ProductView: no Referer, or storage refuses untrusted hosts.
+            referrerPolicy="no-referrer"
             className="object-cover transition group-hover:scale-105"
           />
         ) : null}

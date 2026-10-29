@@ -1,1 +1,11 @@
 @import "tailwindcss";
+@import "@heroui/styles";
+@import "react-phone-number-input/style.css";
+@import "./commerce.css";
+
+/*
+ * The store's visual identity starts here. HeroUI's theme variables
+ * (--accent, --foreground, --background, --border, --surface, …) drive the
+ * components and every commerce screen; override them in :root to apply a
+ * brand rather than editing component classes.
+ */

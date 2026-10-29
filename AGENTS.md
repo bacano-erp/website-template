@@ -146,6 +146,13 @@ cp .env.example .env.local     # placeholders only; ask the user for real values
 pnpm dev
 ```
 
+**On a new site, first ask the user whether it is a store or an informational
+site** — never assume — then run `pnpm setup:site --tipo=tienda` or
+`--tipo=sitio`. The second removes the cart, checkout, payment return and order
+pages and everything only they use (see `docs/inicio.md`). Store-only code in
+shared files sits between `<commerce>` markers; keep new store code inside
+them, or `tests/unit/setup-site.spec.ts` fails.
+
 **Before claiming any change is done:**
 
 ```bash

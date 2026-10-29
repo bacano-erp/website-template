@@ -40,7 +40,29 @@ rebuild. Sin cuentas, la tienda funciona como invitado: navegación, carrito y
 checkout. Clerk solo se carga en las rutas que lo necesitan (checkout, pedido,
 cuenta). Una clave *secreta* de Clerk nunca va en este repo.
 
-## 3. Primer arranque
+## 3. ¿Tienda o sitio informativo?
+
+La plantilla trae la tienda completa: carrito, checkout, pago y pedido. Antes de
+cualquier otra cosa se decide qué es este sitio, y **lo decide la persona**, no
+el agente:
+
+```bash
+pnpm setup:site --tipo=tienda   # vende: se conserva todo
+pnpm setup:site --tipo=sitio    # no vende: se quita la tienda
+pnpm setup:site --tipo=sitio --dry-run   # muestra qué se quitaría
+```
+
+Con `--tipo=sitio` se borran las rutas, módulos, estilos, pruebas y
+dependencias de la tienda, y se limpian los bloques marcados `<commerce>` en los
+archivos compartidos. Queda la base: vista previa, localizador, construcción,
+catálogo y SEO. Es un paso de una sola vía: el script se borra a sí mismo al
+terminar. Si se corre sin `--tipo` en una terminal, pregunta; sin terminal (un
+agente), se detiene y pide preguntarle a la persona.
+
+Las cuentas de comprador no se deciden aquí: se activan en Bacano cuando el
+cliente las necesite (ver la sección 2).
+
+## 4. Primer arranque
 
 ```bash
 pnpm install
@@ -54,14 +76,14 @@ Para ver el sitio como lo sirve producción (barra final, rutas estáticas):
 pnpm build && pnpm start
 ```
 
-## 4. Antes de dar algo por terminado
+## 5. Antes de dar algo por terminado
 
 ```bash
 pnpm verify       # tipos, Biome, ESLint, guard de publicación y skills
 pnpm verify:all   # lo anterior más las pruebas sobre el export, lo que corre CI
 ```
 
-## 5. Identidad visual
+## 6. Identidad visual
 
 Primero que la tienda funcione, después el diseño. Ese orden es mucho más rápido
 que pelear con el diseño de otro. Las skills `bacano-web` (auditoría antes de

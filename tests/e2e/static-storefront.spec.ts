@@ -55,7 +55,15 @@ test.describe("what crawlers get", () => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto("/catalogo/");
-    await expect(page.getByText("Producto de ejemplo").first()).toBeVisible();
+    // By the product link, not by text: the website gate keeps the store inside
+    // a <noscript> until it confirms the live configuration, a browser without
+    // JavaScript renders it, and Playwright's text engine skips <noscript> by
+    // design — so getByText would miss what the visitor actually sees.
+    const product = page
+      .locator('a[href="/producto/producto-de-ejemplo/"]')
+      .first();
+    await expect(product).toBeVisible();
+    await expect(product).toContainText("Producto de ejemplo");
     await context.close();
   });
 

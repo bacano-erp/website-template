@@ -173,6 +173,35 @@ function build() {
   });
 }
 
+/**
+ * The REST reads only the browser makes, such as the public configuration the
+ * website gate checks: the build never asks for them, so the proxy cannot
+ * record them. They are fetched here directly, from the website's own origin —
+ * the gateway refuses any other, exactly as it does in production.
+ */
+async function captureRuntimeReads(fixtures, problems) {
+  const domain = captured.get("ResolveWebsiteBySlug")?.data?.websites?.[0]
+    ?.domain;
+
+  for (const key of Object.keys(fixtures)) {
+    const [method, path] = key.split(" ");
+    if (method !== "GET" || !path?.startsWith("/")) continue;
+
+    if (!domain) {
+      problems.push(
+        `${key}: the website has no domain, so the gateway cannot be asked from its origin`,
+      );
+      continue;
+    }
+
+    const url = `${apiUrl.replace(/\/+$/, "")}${path}?websiteSlug=${encodeURIComponent(websiteSlug)}`;
+    const response = await fetch(url, {
+      headers: { Origin: `https://${domain}` },
+    });
+    if (response.ok) captured.set(key, await response.json());
+  }
+}
+
 async function main() {
   await new Promise((ready) => proxy.listen(PORT, ready));
 
@@ -186,6 +215,8 @@ async function main() {
   const fixtures = JSON.parse(readFileSync(FIXTURES, "utf8"));
   const problems = [];
   let compared = 0;
+
+  await captureRuntimeReads(fixtures, problems);
 
   for (const [operation, recorded] of Object.entries(fixtures)) {
     const live = captured.get(operation);

@@ -53,5 +53,102 @@
         "errors": []
       }
     }
+  },
+  "GET /api/v1/website/public-config": {
+    "website_id": "00000000-0000-4000-8000-0000000000ff",
+    "company_id": "00000000-0000-4000-8000-0000000000ff",
+    "context_schema_version": 1,
+    "chain_id": "00000000-0000-4000-8000-0000000000ff",
+    "slug": "tienda-de-ejemplo",
+    "name": "Tienda de ejemplo",
+    "domain": "tienda.example.com",
+    "config": {},
+    "buyer_accounts_enabled": false,
+    "clerk_publishable_key": null,
+    "customer_identification": {
+      "primary_identifier": "AUTO",
+      "require_email": false,
+      "require_phone": false,
+      "require_document": false,
+      "document_types": [
+        {
+          "code": "13",
+          "name": "Cédula de ciudadanía",
+          "short_label": "CC",
+          "is_default": true
+        },
+        {
+          "code": "31",
+          "name": "NIT",
+          "short_label": "NIT",
+          "is_default": false
+        },
+        {
+          "code": "22",
+          "name": "Cédula de extranjería",
+          "short_label": "CE",
+          "is_default": false
+        },
+        {
+          "code": "41",
+          "name": "Pasaporte",
+          "short_label": "Pasaporte",
+          "is_default": false
+        }
+      ]
+    },
+    "branding": {
+      "schema_version": 1,
+      "favicon": null
+    },
+    "price_type_aliases": {},
+    "construction": {
+      "schema_version": 1,
+      "enabled": false,
+      "title": null,
+      "message": null,
+      "desktop_image": null,
+      "mobile_image": null,
+      "enforced": false,
+      "preview_access_granted": false
+    },
+    "volume_pricing": {
+      "schema_version": 1,
+      "enabled": false,
+      "tiers": []
+    },
+    "marketing": {
+      "schema_version": 1,
+      "enabled": false,
+      "currency_code": "COP",
+      "time_zone": "America/Bogota",
+      "attribution_window_days": 90,
+      "consent_policy": null,
+      "destinations": {
+        "ga4": null,
+        "meta": null,
+        "clarity": null,
+        "gtm": null
+      }
+    },
+    "legal": {
+      "schema_version": 1,
+      "version": 0,
+      "content_hash": null,
+      "documents": {
+        "terms": null,
+        "shipping": null,
+        "returns": null,
+        "privacy": null,
+        "cookies": null
+      },
+      "inquiries_channel": null,
+      "direct_marketing_consent": null,
+      "cookie_notice": {
+        "enabled": false,
+        "message": "Usamos cookies propias y de terceros para mejorar tu experiencia y medir el funcionamiento del sitio.",
+        "button_label": "Entendido"
+      }
+    }
   }
 }

@@ -53,10 +53,24 @@ const ALLOWED_HOSTS = new Set([
   // them only ever fails a pull request for its own boilerplate.
   "anthropic.com",
   "claude.com",
+  // The agent skills shipped by @bacano/sdk (.agents/skills) document the Figma
+  // connection and use a Spanish placeholder in an audit example. Figma is a
+  // public vendor like Clerk or HeroUI; "ejemplo.com" stands for any store.
+  "figma.com",
+  "ejemplo.com",
 ]);
 
 /** Only this organisation's repositories may be linked by URL. */
 const ALLOWED_GITHUB_OWNER = "bacano-erp";
+
+/**
+ * Public open-source repositories outside the organisation that the SDK's
+ * skills link to. Never a customer's: those are described by role.
+ */
+const ALLOWED_THIRD_PARTY_REPOS = new Set([
+  // The community Figma desktop bridge, documented by the bacano-figma-web skill.
+  "southleft/figma-console-mcp",
+]);
 
 const SECRET_PATTERNS = [
   [/\bghp_[A-Za-z0-9]{20,}/, "GitHub personal access token"],
@@ -128,7 +142,10 @@ export function findings(text, where) {
 
   for (const match of text.matchAll(GITHUB_REPO)) {
     const [, owner, repo] = match;
-    if (owner.toLowerCase() !== ALLOWED_GITHUB_OWNER) {
+    if (
+      owner.toLowerCase() !== ALLOWED_GITHUB_OWNER &&
+      !ALLOWED_THIRD_PARTY_REPOS.has(`${owner}/${repo}`.toLowerCase())
+    ) {
       found.push(
         `${where}: links a repository outside ${ALLOWED_GITHUB_OWNER} (${owner}/${repo}) — ` +
           `if it is a customer's, describe it by role instead`,

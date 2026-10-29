@@ -50,6 +50,13 @@ jobs:
       - name: Public disclosure guard
         run: node scripts/check-disclosure.mjs
 
+      # The agent skills in .agents/ come from @bacano/sdk. An SDK upgrade
+      # without `pnpm sdk:update` leaves agents reading instructions for the
+      # previous version, which is how the stores built from this template
+      # ended up with ten different copies.
+      - name: Agent skills match the installed SDK
+        run: pnpm check:skills
+
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 

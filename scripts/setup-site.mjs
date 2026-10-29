@@ -171,6 +171,16 @@ async function main() {
   for (const path of removed)
     rmSync(resolve(path), { recursive: true, force: true });
 
+  // A one-way step: once the store is gone, this script and its test describe
+  // a store that no longer exists, so they go too.
+  rmSync(resolve("tests/unit/setup-site.spec.ts"), { force: true });
+  const packageJson = JSON.parse(readFileSync(resolve("package.json"), "utf8"));
+  delete packageJson.scripts["setup:site"];
+  writeFileSync(
+    resolve("package.json"),
+    `${JSON.stringify(packageJson, null, 2)}\n`,
+  );
+
   execFileSync("pnpm", ["remove", ...STORE_DEPENDENCIES], { stdio: "inherit" });
   execFileSync("pnpm", ["exec", "biome", "check", "--write", "."], {
     stdio: "inherit",
@@ -180,6 +190,7 @@ async function main() {
     "\nSitio informativo listo: se quitaron carrito, checkout, pago y pedido.\n" +
       "Revisa que todo compile con `pnpm verify:all` y haz commit del resultado.",
   );
+  rmSync(resolve("scripts/setup-site.mjs"), { force: true });
 }
 
 // Imported by its tests, run as a script otherwise.

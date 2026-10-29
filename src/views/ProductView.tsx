@@ -1,6 +1,8 @@
 import { getPrimaryProductImage, type Product } from "@bacano/sdk";
 import Image from "next/image";
+// <commerce>
 import { AddToCart } from "@/components/AddToCart";
+// </commerce>
 import { LivePrice } from "@/components/LivePrice";
 import { Markdown } from "@/components/Markdown";
 
@@ -55,16 +57,18 @@ export function ProductView({ product }: { product: Product }) {
 
         {product.description && <Markdown>{product.description}</Markdown>}
 
+        {/* <commerce> */}
         {/* Live island — stock is never baked. */}
         <div className="mt-8">
           {variant ? (
             <AddToCart product={product} variant={variant} />
           ) : (
-            <p className="text-neutral-500 text-sm">
+            <p className="text-muted text-sm">
               Este producto no tiene variantes disponibles.
             </p>
           )}
         </div>
+        {/* </commerce> */}
       </div>
     </article>
   );

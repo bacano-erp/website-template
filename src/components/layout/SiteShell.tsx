@@ -4,15 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { storeConfig } from "@/config/store";
+// <commerce>
 import { CartButton } from "@/features/commerce/cart/CartButton";
 import { CheckoutHeader } from "@/features/commerce/checkout/CheckoutHeader";
 
+// </commerce>
+
 /** Routes whose view draws its own <main> and page width. */
-const FULL_VIEW_ROUTES = [
+const FULL_VIEW_ROUTES: string[] = [
+  // <commerce>
   "/carrito",
   "/checkout",
   "/pago/respuesta",
   "/pedido",
+  // </commerce>
 ];
 
 const matches = (pathname: string, route: string) =>
@@ -28,6 +33,7 @@ const matches = (pathname: string, route: string) =>
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
+  // <commerce>
   if (matches(pathname, "/checkout")) {
     return (
       <>
@@ -36,6 +42,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       </>
     );
   }
+  // </commerce>
 
   const ownsLayout = FULL_VIEW_ROUTES.some((route) => matches(pathname, route));
 
@@ -50,7 +57,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <Link href="/catalogo/" className="hover:underline">
               Catálogo
             </Link>
+            {/* <commerce> */}
             <CartButton />
+            {/* </commerce> */}
           </div>
         </nav>
       </header>

@@ -19,6 +19,7 @@
     "format:check": "biome format .",
     "lint": "eslint .",
     "sdk:update": "pnpm up @bacano/sdk@latest && bacano-web install --agent all --force && bacano-figma-web install --agent all --force",
+    "setup:site": "node scripts/setup-site.mjs",
     "start": "npx serve@latest out",
     "test:e2e": "node scripts/test-static.mjs",
     "typecheck": "tsc --noEmit",

@@ -150,5 +150,200 @@
         "button_label": "Entendido"
       }
     }
+  },
+  "GetProductLiveState": {
+    "data": {
+      "product_variants": [
+        {
+          "id": "00000000-0000-4000-8000-0000000000ff",
+          "product_variant_prices": [
+            {
+              "id": "00000000-0000-4000-8000-0000000000ff",
+              "price": 54000,
+              "price_type": "CLIENT",
+              "chain_id": "00000000-0000-4000-8000-0000000000ff"
+            }
+          ]
+        }
+      ],
+      "websiteProductAvailability": [
+        {
+          "product_variant_id": "00000000-0000-4000-8000-0000000000ff",
+          "in_stock": true,
+          "label": "In Stock",
+          "max_purchasable_quantity": 18
+        }
+      ]
+    }
+  },
+  "GetDeliveryOptions": {
+    "data": {
+      "websiteGetDeliveryOptions": {
+        "success": true,
+        "delivery_options": [
+          {
+            "id": "shipping",
+            "fulfillment_family": "SHIPPING",
+            "label": "Envío",
+            "description": null,
+            "is_enabled": true,
+            "pickup_info": null
+          },
+          {
+            "id": "pickup",
+            "fulfillment_family": "PICKUP",
+            "label": "Recoger en tienda",
+            "description": null,
+            "is_enabled": true,
+            "pickup_info": {
+              "label": "Recoger en tienda",
+              "address": null,
+              "schedule": null,
+              "notes": null
+            }
+          }
+        ],
+        "errors": null
+      }
+    }
+  },
+  "GetLocationOptions": {
+    "data": {
+      "websiteGetLocationOptions": {
+        "success": true,
+        "country_code": "CO",
+        "departments": [
+          {
+            "department_id": "91",
+            "department_name": "AMAZONAS",
+            "department_code": "91",
+            "municipalities": [
+              {
+                "municipality_id": "91263",
+                "municipality_name": "EL ENCANTO",
+                "municipality_code": "91263",
+                "department_id": "91",
+                "department_code": "91"
+              },
+              {
+                "municipality_id": "91405",
+                "municipality_name": "LA CHORRERA",
+                "municipality_code": "91405",
+                "department_id": "91",
+                "department_code": "91"
+              },
+              {
+                "municipality_id": "91407",
+                "municipality_name": "LA PEDRERA",
+                "municipality_code": "91407",
+                "department_id": "91",
+                "department_code": "91"
+              }
+            ]
+          },
+          {
+            "department_id": "05",
+            "department_name": "ANTIOQUIA",
+            "department_code": "05",
+            "municipalities": [
+              {
+                "municipality_id": "05002",
+                "municipality_name": "ABEJORRAL",
+                "municipality_code": "05002",
+                "department_id": "05",
+                "department_code": "05"
+              },
+              {
+                "municipality_id": "05004",
+                "municipality_name": "ABRIAQUÍ",
+                "municipality_code": "05004",
+                "department_id": "05",
+                "department_code": "05"
+              },
+              {
+                "municipality_id": "05021",
+                "municipality_name": "ALEJANDRÍA",
+                "municipality_code": "05021",
+                "department_id": "05",
+                "department_code": "05"
+              }
+            ]
+          }
+        ],
+        "errors": null
+      }
+    }
+  },
+  "GetPaymentOptions": {
+    "data": {
+      "websiteGetPaymentOptions": {
+        "success": true,
+        "payment_options": [
+          {
+            "id": "00000000-0000-4000-8000-0000000000ff",
+            "mode": "pay_now",
+            "fulfillment_family": "SHIPPING",
+            "label": "Pagar ahora",
+            "description": "Paga en la web y recibe tu pedido.",
+            "requires_payment_method": true,
+            "allows_initial_payment": false,
+            "initial_payment_policy": "none",
+            "requires_initial_payment": false,
+            "min_initial_amount": null,
+            "suggested_initial_amount": null,
+            "sort_order": 10,
+            "methods": [
+              {
+                "id": "00000000-0000-4000-8000-0000000000ff",
+                "payment_method_id": "00000000-0000-4000-8000-0000000000ff",
+                "code": "OPENPAY",
+                "label": "openpay bbva",
+                "payment_method_type": "gateway",
+                "gateway_code": "OPENPAY",
+                "description": null,
+                "instructions": null,
+                "qr_file_id": null,
+                "requires_payment_session": true,
+                "public_config": {},
+                "sort_order": 2
+              },
+              {
+                "id": "00000000-0000-4000-8000-0000000000ff",
+                "payment_method_id": "00000000-0000-4000-8000-0000000000ff",
+                "code": "MERCADOPAGO",
+                "label": "Mercadopago",
+                "payment_method_type": "gateway",
+                "gateway_code": "MERCADOPAGO",
+                "description": null,
+                "instructions": null,
+                "qr_file_id": null,
+                "requires_payment_session": true,
+                "public_config": {
+                  "reference": "pagos@example.com"
+                },
+                "sort_order": 3
+              }
+            ]
+          }
+        ],
+        "errors": null
+      }
+    }
+  },
+  "GetFreeShippingProgress": {
+    "data": {
+      "websiteGetFreeShippingProgress": {
+        "success": true,
+        "progress": {
+          "enabled": true,
+          "threshold": 280000,
+          "remaining": 226000,
+          "eligible_subtotal": 54000,
+          "threshold_reached": false,
+          "currency": "COP"
+        },
+        "errors": null
+      }
+    }
   }
 }

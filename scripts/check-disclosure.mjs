@@ -58,6 +58,12 @@ const ALLOWED_HOSTS = new Set([
   // public vendor like Clerk or HeroUI; "ejemplo.com" stands for any store.
   "figma.com",
   "ejemplo.com",
+  // Public services the storefront itself links to: WhatsApp help links, and
+  // the video hosts a Content rich-text field may embed.
+  "wa.me",
+  "youtube.com",
+  "youtube-nocookie.com",
+  "vimeo.com",
 ]);
 
 /** Only this organisation's repositories may be linked by URL. */

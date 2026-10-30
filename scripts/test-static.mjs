@@ -191,9 +191,11 @@ async function main() {
       specs: [
         "tests/unit",
         "tests/e2e/static-storefront.spec.ts",
-        "tests/e2e/payment-adverse.spec.ts",
         "tests/e2e/website-gate.spec.ts",
+        // <commerce>
+        "tests/e2e/payment-adverse.spec.ts",
         "tests/e2e/commerce.spec.ts",
+        // </commerce>
       ],
       buildId: `test-catalogue-${Date.now()}`,
     });

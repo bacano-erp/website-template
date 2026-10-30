@@ -2,12 +2,12 @@
 
 import { BacanoWebsiteGate } from "@bacano/sdk/react";
 import { I18nProvider } from "@heroui/react";
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { storeConfig } from "@/config/store";
 import { BuyerAccountsProvider } from "@/features/account/BuyerAccountsProvider";
-import { CartDrawer } from "@/features/commerce/cart/CartDrawer";
-import { CartProvider } from "@/features/commerce/cart/CartProvider";
+// <commerce>
+import { CommerceProviders } from "@/features/commerce/CommerceProviders";
+// </commerce>
 import { getBacanoEnv } from "@/lib/bacano/env";
 
 /**
@@ -37,22 +37,20 @@ export function Providers({ children }: { children: ReactNode }) {
  * Buyer accounts are opt-in per website, so most stores have no key and run
  * guest-only; nothing here waits on a Clerk that will never load.
  *
- * The cart is local until checkout has a contact (see CartProvider), and both
- * it and the drawer stay out of the preview, which renders content rather than
- * a shopping session.
+ * Store-only pieces are marked `<commerce>`: `pnpm setup:site --tipo=sitio`
+ * removes them for an informational site (see scripts/setup-site.mjs).
  */
 function StorefrontProviders({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const isPreview =
-    pathname === "/vista-previa" || pathname.startsWith("/vista-previa/");
-
   return (
     <I18nProvider locale={storeConfig.locale}>
       <BuyerAccountsProvider>
-        <CartProvider disabled={isPreview}>
+        {/* <commerce> */}
+        <CommerceProviders>
+          {/* </commerce> */}
           {children}
-          {isPreview ? null : <CartDrawer />}
-        </CartProvider>
+          {/* <commerce> */}
+        </CommerceProviders>
+        {/* </commerce> */}
       </BuyerAccountsProvider>
     </I18nProvider>
   );

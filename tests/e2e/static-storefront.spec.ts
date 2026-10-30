@@ -18,8 +18,10 @@ test.describe("the export", () => {
   const publicPages = [
     ["/", "index.html"],
     ["/catalogo/", "catalogo/index.html"],
+    // <commerce>
     ["/carrito/", "carrito/index.html"],
     ["/checkout/", "checkout/index.html"],
+    // </commerce>
     [
       "/producto/producto-de-ejemplo/",
       "producto/producto-de-ejemplo/index.html",
@@ -73,6 +75,7 @@ test.describe("what crawlers get", () => {
     );
   });
 
+  // <commerce>
   test("private pages declare noindex", () => {
     // Both carry an order token in the query string. Indexed, that token ends
     // up in a search result.
@@ -80,6 +83,7 @@ test.describe("what crawlers get", () => {
       expect(html(file)).toMatch(/noindex/);
     }
   });
+  // </commerce>
 });
 
 test.describe("the sitemap", () => {
@@ -89,6 +93,7 @@ test.describe("the sitemap", () => {
     expect(sitemap()).toContain("/producto/producto-de-ejemplo/");
   });
 
+  // <commerce>
   test("excludes checkout, cart, order and payment return", () => {
     // A sitemap is a claim that these URLs are worth indexing. Two of them
     // are private, and the others are dead ends for a crawler.
@@ -101,6 +106,7 @@ test.describe("the sitemap", () => {
       expect(sitemap()).not.toContain(path);
     }
   });
+  // </commerce>
 
   test("never lists the empty-catalogue placeholder", () => {
     // The placeholder exists so a store with no products can build at all. It
@@ -110,6 +116,7 @@ test.describe("the sitemap", () => {
 });
 
 test.describe("the storefront at runtime", () => {
+  // <commerce>
   test("the payment return survives a gateway that sends nothing useful", async ({
     page,
   }) => {
@@ -125,14 +132,15 @@ test.describe("the storefront at runtime", () => {
     await page.goto("/pedido/");
     await expect(page.getByText(/no encontramos el pedido/i)).toBeVisible();
   });
+  // </commerce>
 
-  test("a store with no Clerk key still renders its cart", async ({ page }) => {
+  test("a store with no Clerk key still renders", async ({ page }) => {
     // Buyer accounts are opt-in and most stores ship without them. This
     // configuration is the one that broke every provisioned store once.
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
 
-    await page.goto("/carrito/");
+    await page.goto("/");
     await expect(page.locator("h1")).toBeVisible();
     expect(errors).toEqual([]);
   });

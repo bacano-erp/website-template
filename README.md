@@ -6,7 +6,7 @@ Starting point for a customer storefront built on the [Bacano ERP](https://api.b
 
 Next.js (static export) → S3 → CloudFront. No server, no cold starts, no runtime to patch.
 
-This template is deliberately **unstyled and neutral**. Get the store working first, then apply the customer's visual identity — that order is much faster than fighting someone else's design.
+The UI is HeroUI v3 on Tailwind 4, with a neutral theme. Get the store working first, then apply the customer's visual identity by setting HeroUI's theme variables in `src/app/globals.css` — the cart and checkout read only those.
 
 ---
 
@@ -85,26 +85,30 @@ Both run the same pipeline: build → sync to S3 → invalidate CloudFront.
 ```
 src/
 ├── app/
-│   ├── layout.tsx              Shell, nav, metadata
-│   ├── providers.tsx           Clerk + BacanoProvider  ("use client")
+│   ├── layout.tsx              Metadata; frame from components/layout/SiteShell
+│   ├── providers.tsx           Construction gate → SDK, measurement, optional Clerk → cart
 │   ├── page.tsx                Home — build time
 │   ├── catalogo/page.tsx       Catalogue — build time
 │   ├── producto/[slug]/        Product detail — build time + generateStaticParams
 │   ├── carrito/page.tsx        Cart — fully client-side
-│   ├── checkout/page.tsx       Checkout scaffold — finish this per store
+│   ├── checkout/page.tsx       Checkout — contact, delivery, coupons, payment
 │   ├── pago/respuesta/         Payment return — reconciles and waits for payment
-│   └── pedido/page.tsx         Order detail for guests, by token
+│   └── pedido/page.tsx         Order tracking for guests, by token
 ├── components/
 │   ├── ProductCard.tsx         Static
-│   ├── AddToCart.tsx           Live island: stock + cart
+│   ├── AddToCart.tsx           Live island: stock + local cart
 │   ├── LivePrice.tsx           Live island: price + discount
-│   ├── PaymentReturn.tsx       Gateway return handling
-│   └── OrderDetail.tsx         Public order lookup
-├── config/bacano-lists.ts      Which category/attribute lists this store builds from
+│   ├── content/                Content entries, with the locator marker
+│   ├── form/                   Form fields over HeroUI
+│   └── layout/SiteShell.tsx    Store header and footer; checkout's own header
+├── features/
+│   ├── commerce/               Cart, drawer, checkout, payment return, order (docs/comercio.md)
+│   ├── account/                Optional buyer accounts (Clerk) and the shared SDK client
+│   └── preview/                Routes the preview can render
+├── config/                     Store presentation, Clerk screens, catalogue lists
 └── lib/
-    ├── bacano.ts               Build-time client, browser client, price formatting
-    ├── static-catalog.ts       Whole catalogue in one read, shared across the build
-    └── order-return.ts         Return URL, gateway params, order storage
+    ├── bacano/                 Build client, shared browser client, formatters, media
+    └── static-catalog.ts       Whole catalogue in one read, shared across the build
 ```
 
 **Before the first build**, set the two list keys in `config/bacano-lists.ts` to the

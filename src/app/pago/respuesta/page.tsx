@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PaymentReturn } from "@/components/PaymentReturn";
+import { PaymentResponseClient } from "@/features/commerce/checkout/PaymentResponseClient";
 
 export const metadata: Metadata = {
   title: "Respuesta de pago",
@@ -19,8 +19,10 @@ export default function PaymentResponsePage() {
   return (
     // `useSearchParams` needs a Suspense boundary to prerender under
     // `output: export`; without it the build fails rather than the page.
-    <Suspense fallback={<p className="text-neutral-600">Cargando…</p>}>
-      <PaymentReturn />
+    <Suspense
+      fallback={<p className="container-page py-10 text-muted">Cargando…</p>}
+    >
+      <PaymentResponseClient />
     </Suspense>
   );
 }

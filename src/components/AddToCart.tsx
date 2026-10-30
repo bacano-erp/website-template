@@ -1,26 +1,42 @@
 "use client";
 
-import { useCart, useProductLiveState } from "@bacano/sdk/react";
+import type { Product, ProductVariant } from "@bacano/sdk";
+import { useProductLiveState } from "@bacano/sdk/react";
 import { useState } from "react";
+import { useCart } from "@/features/commerce/cart/CartProvider";
+import { getPrimaryImage } from "@/lib/bacano/formatters";
+import {
+  getPrimaryProductMedia,
+  getProductMediaSrcSet,
+} from "@/lib/bacano/media";
 
 /**
  * The live island on an otherwise static page.
  *
- * Stock and the cart are deliberately NOT baked at build time: a published page
- * can be hours or days old, and selling something that is out of stock is worse
- * than a brief loading state. Both are read from the Bacano API in the browser,
- * on every view.
+ * Stock is deliberately NOT baked at build time: a published page can be hours
+ * or days old, and selling something that is out of stock is worse than a
+ * brief loading state. It is read from the Bacano API in the browser, on every
+ * view.
+ *
+ * The cart itself stays in the browser until checkout has a contact (see
+ * CartProvider). Adding a product sends nothing to Bacano, so browsing never
+ * leaves empty carts behind in the platform, and the drawer opens right away.
  */
-export function AddToCart({ productVariantId }: { productVariantId: string }) {
+export function AddToCart({
+  product,
+  variant,
+}: {
+  product: Product;
+  variant: ProductVariant;
+}) {
   // Same request LivePrice makes, and the same hook: stock and price come back
   // together, so the page pays for one round trip rather than two.
   const { data: liveState, loading: checkingStock } = useProductLiveState([
-    productVariantId,
+    variant.id,
   ]);
-  const { cart, addItem, getOrCreate } = useCart();
+  const { addVariant } = useCart();
 
   const [pending, setPending] = useState(false);
-  const [added, setAdded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const stock = liveState?.[0];
@@ -30,22 +46,26 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
     setPending(true);
     setError(null);
     try {
-      // A cart has to exist before anything can go in it. `addItem` writes
-      // against a session — an order id and a cart token — and throws
-      // "Start checkout with contact before syncing cart items to Bacano"
-      // when there is none, which is what every first click used to do.
-      //
-      // `getOrCreate()` with no arguments makes an anonymous one; contact
-      // details are collected later, by the store's own checkout, through
-      // `startCheckout`. Guarded on `cart` rather than called every time
-      // because it is a round trip, though it is safe to repeat: it sends the
-      // existing token and gets the same cart back.
-      if (!cart) {
-        await getOrCreate();
-      }
-
-      await addItem(productVariantId, 1);
-      setAdded(true);
+      await addVariant(
+        {
+          productVariantId: variant.id,
+          productId: product.id,
+          productSlug: product.slug,
+          productName: product.name,
+          productImageSrc: getPrimaryImage(product),
+          productImageSrcSet: getProductMediaSrcSet(
+            getPrimaryProductMedia(product.media),
+          ),
+          sku: variant.sku,
+          pricing: variant.pricing,
+          variantAttributes: variant.attributes.map(({ name, value }) => ({
+            name,
+            value,
+          })),
+        },
+        1,
+        stock?.maxPurchasableQuantity,
+      );
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "No se pudo agregar al carrito",
@@ -62,7 +82,7 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
       <div
         role="status"
         aria-live="polite"
-        className="h-11 w-full animate-pulse rounded bg-neutral-100"
+        className="h-11 w-full animate-pulse rounded-full bg-default"
       >
         <span className="sr-only">Consultando disponibilidad</span>
       </div>
@@ -71,7 +91,7 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
 
   if (!inStock) {
     return (
-      <p className="rounded bg-neutral-100 px-4 py-3 text-neutral-600 text-sm">
+      <p className="rounded-md bg-default px-4 py-3 text-muted text-sm">
         {stock?.availabilityLabel ?? "Agotado"}
       </p>
     );
@@ -82,12 +102,12 @@ export function AddToCart({ productVariantId }: { productVariantId: string }) {
       <button
         type="button"
         onClick={handleAdd}
-        disabled={pending || added}
-        className="h-11 w-full rounded bg-neutral-900 px-4 font-medium text-sm text-white transition hover:bg-neutral-700 disabled:opacity-50"
+        disabled={pending}
+        className="btn btn-cart w-full"
       >
-        {pending ? "Agregando…" : added ? "Agregado ✓" : "Agregar al carrito"}
+        {pending ? "Agregando…" : "Agregar al carrito"}
       </button>
-      {error && <p className="mt-2 text-red-600 text-sm">{error}</p>}
+      {error && <p className="mt-2 text-danger text-sm">{error}</p>}
     </div>
   );
 }

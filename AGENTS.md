@@ -200,10 +200,17 @@ same build — that is one network round trip per product.
 
 ## Styling
 
-The template ships deliberately **unstyled and neutral**. When applying a
-customer's visual identity, get the store working first, then style. Do not
-introduce a component library or CSS framework beyond what is already here
-without asking — it is a long-lived decision for someone else's codebase.
+The UI is **HeroUI v3** on Tailwind 4, and the store's identity lives in its
+theme: HeroUI's CSS variables (`--accent`, `--foreground`, `--background`,
+`--border`, `--surface`, …) set in `src/app/globals.css`. The cart and checkout
+use those tokens only — never a hex value — so restyling a store is a theme
+change, not a hunt through components. Get the store working first, then
+style.
+
+Icons are `lucide-react`. An animation library is not part of the template;
+`motion` is the suggested one when a store needs it, loaded only where used and
+respecting `prefers-reduced-motion`. Ask before adding any other UI library: it
+is a long-lived decision for someone else's codebase.
 
 ---
 

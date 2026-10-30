@@ -28,14 +28,17 @@ Todo lo que hay aquí llega al navegador: solo existen variables
 | `NEXT_PUBLIC_BACANO_WEBSITE_SLUG` | El slug del website |
 | `NEXT_PUBLIC_SITE_URL` | La URL pública del sitio. Obligatoria: sin ella las URLs canónicas apuntarían a localhost |
 | `NEXT_PUBLIC_SITE_NAME` | El nombre que se muestra |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Opcional. Solo si el cliente tiene cuentas de comprador |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Opcional, solo en local. Con número, el checkout y el pedido ofrecen ayuda por WhatsApp. El deploy de Bacano no la inyecta: en producción el número va en `src/config/store.ts` |
 
 En local se copian de `.env.example` a `.env.local`. En CI y en el deploy las
 inyecta Bacano como variables del repositorio al aprovisionar el sitio.
 
-**Cuentas de comprador (Clerk)** son opcionales y se deciden por cliente. Con
-la variable vacía la tienda funciona sin cuentas: navegación, carrito y
-checkout como invitado. Una clave *secreta* de Clerk nunca va en este repo.
+**Cuentas de comprador (Clerk)** son opcionales y se deciden por cliente **en
+Bacano**, no aquí: al activarlas en el website, Bacano entrega la clave
+*publicable* de Clerk en la configuración pública y la tienda la usa sin
+rebuild. Sin cuentas, la tienda funciona como invitado: navegación, carrito y
+checkout. Clerk solo se carga en las rutas que lo necesitan (checkout, pedido,
+cuenta). Una clave *secreta* de Clerk nunca va en este repo.
 
 ## 3. Primer arranque
 

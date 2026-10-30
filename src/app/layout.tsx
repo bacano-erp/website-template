@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteShell } from "@/components/layout/SiteShell";
 import { requireSiteUrl } from "@/lib/site-url";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -30,31 +30,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="min-h-screen bg-white text-neutral-900 antialiased">
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <Providers>
-          <header className="border-neutral-200 border-b">
-            <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-              <Link href="/" className="font-semibold text-lg">
-                {siteName}
-              </Link>
-              <div className="flex items-center gap-6 text-sm">
-                <Link href="/catalogo/" className="hover:underline">
-                  Catálogo
-                </Link>
-                <Link href="/carrito/" className="hover:underline">
-                  Carrito
-                </Link>
-              </div>
-            </nav>
-          </header>
-
-          <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>
-
-          <footer className="mt-16 border-neutral-200 border-t">
-            <div className="mx-auto max-w-5xl px-4 py-8 text-neutral-500 text-sm">
-              © {new Date().getFullYear()} {siteName}
-            </div>
-          </footer>
+          <SiteShell>{children}</SiteShell>
         </Providers>
       </body>
     </html>

@@ -58,7 +58,7 @@ export function ProductView({ product }: { product: Product }) {
         {/* Live island — stock is never baked. */}
         <div className="mt-8">
           {variant ? (
-            <AddToCart productVariantId={variant.id} />
+            <AddToCart product={product} variant={variant} />
           ) : (
             <p className="text-neutral-500 text-sm">
               Este producto no tiene variantes disponibles.

@@ -1,0 +1,305 @@
+/*
+ * Shared styles of the cart and checkout, on HeroUI's theme tokens.
+ *
+ * No colour is written here: everything reads --accent, --foreground,
+ * --border and friends, so a store restyles its whole checkout by setting its
+ * theme once (see globals.css) instead of hunting hex values across files.
+ */
+
+.container-page,
+.checkout-page-container {
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+@media (min-width: 700px) and (max-width: 1023px) {
+  .checkout-page-container {
+    width: min(720px, calc(100% - 64px));
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .checkout-page-container {
+    width: min(940px, calc(100% - 96px));
+  }
+}
+
+/* The page behind an open cart drawer should not show a second scrollbar. */
+html:has(.cart-drawer-backdrop) {
+  scrollbar-width: none;
+}
+
+html:has(.cart-drawer-backdrop)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Buttons. `btn-cart` is the buying action; `btn-primary` the next step. */
+.btn {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.72rem 1.55rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.btn-primary,
+.btn-cart {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.btn-primary:hover,
+.btn-cart:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* react-phone-number-input, drawn like the HeroUI fields around it. */
+.bacano-phone-input {
+  --PhoneInput-color--focus: var(--accent);
+  --PhoneInputCountryFlag-aspectRatio: 1.5;
+  --PhoneInputCountryFlag-height: 1em;
+  --PhoneInputCountryFlag-borderWidth: 0;
+  --PhoneInputCountryFlag-borderColor: transparent;
+  --PhoneInputCountryFlag-backgroundColor--loading: transparent;
+  --PhoneInputCountrySelect-marginRight: 0.7em;
+  --PhoneInputCountrySelectArrow-width: 0.35em;
+  --PhoneInputCountrySelectArrow-marginLeft: 0.45em;
+  --PhoneInputCountrySelectArrow-borderWidth: 1.5px;
+  --PhoneInputCountrySelectArrow-color: var(--muted);
+  --PhoneInputCountrySelectArrow-transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-background);
+  padding-inline: 12px;
+  color: var(--field-foreground);
+  transition: border-color 0.18s ease;
+}
+
+.bacano-phone-input:hover {
+  border-color: var(--field-border-hover);
+}
+
+.bacano-phone-input:focus-within {
+  border-color: var(--field-border-focus);
+}
+
+.bacano-phone-input-error,
+.bacano-phone-input-error:hover,
+.bacano-phone-input-error:focus-within {
+  border-color: var(--danger);
+}
+
+.bacano-phone-input .PhoneInputCountry {
+  position: relative;
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.bacano-phone-input .PhoneInputCountrySelect {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.bacano-phone-input .PhoneInputCountryIcon {
+  display: block;
+  flex: 0 0 auto;
+  width: calc(
+    var(--PhoneInputCountryFlag-height) *
+    var(--PhoneInputCountryFlag-aspectRatio)
+  );
+  height: var(--PhoneInputCountryFlag-height);
+  overflow: hidden;
+  background-color: transparent;
+}
+
+.bacano-phone-input .PhoneInputCountryIconImg {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: 100%;
+}
+
+.bacano-phone-input .PhoneInputCountrySelectArrow {
+  display: block;
+  width: var(--PhoneInputCountrySelectArrow-width);
+  height: var(--PhoneInputCountrySelectArrow-width);
+  margin-left: var(--PhoneInputCountrySelectArrow-marginLeft);
+  border-style: solid;
+  border-color: var(--PhoneInputCountrySelectArrow-color);
+  border-width: 0 var(--PhoneInputCountrySelectArrow-borderWidth)
+    var(--PhoneInputCountrySelectArrow-borderWidth) 0;
+  transform: var(--PhoneInputCountrySelectArrow-transform);
+}
+
+.bacano-phone-input .PhoneInputInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  /* 16px on phones, or iOS zooms into the field on focus. */
+  font-size: 16px;
+  line-height: 1.25;
+  outline: none;
+}
+
+@media (min-width: 640px) {
+  .bacano-phone-input .PhoneInputInput {
+    font-size: 14px;
+  }
+}
+
+.bacano-phone-input .PhoneInputInput::placeholder {
+  color: var(--field-placeholder);
+}
+
+/* The screen shown while a payment gateway session is being opened. */
+.checkout-payment-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 24px;
+  background: var(--background);
+  color: var(--foreground);
+  text-align: center;
+}
+
+.checkout-payment-loading__content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 620px);
+  justify-items: center;
+}
+
+.checkout-payment-loading__mascot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+}
+
+.checkout-payment-loading__eyebrow {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.checkout-payment-loading h2 {
+  max-width: 560px;
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.checkout-payment-loading__content > p:not(.checkout-payment-loading__eyebrow) {
+  max-width: 480px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  line-height: 1.55;
+}
+
+.checkout-payment-loading__dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.checkout-payment-loading__dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: checkout-payment-dot 1s ease-in-out infinite;
+}
+
+.checkout-payment-loading__dots span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.checkout-payment-loading__dots span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+@keyframes checkout-payment-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-payment-loading__dots span,
+  .checkout-payment-loading__mascot svg {
+    animation: none;
+  }
+
+  .btn:hover {
+    transform: none;
+  }
+}

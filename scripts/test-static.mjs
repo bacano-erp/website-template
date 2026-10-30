@@ -193,6 +193,7 @@ async function main() {
         "tests/e2e/static-storefront.spec.ts",
         "tests/e2e/payment-adverse.spec.ts",
         "tests/e2e/website-gate.spec.ts",
+        "tests/e2e/commerce.spec.ts",
       ],
       buildId: `test-catalogue-${Date.now()}`,
     });

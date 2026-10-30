@@ -26,6 +26,10 @@ export function ProductView({ product }: { product: Product }) {
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
+            // Bacano storage refuses requests whose Referer it does not trust
+            // (localhost, a preview host), and the browser then blocks the
+            // error it returns. Sending none works on every host.
+            referrerPolicy="no-referrer"
             className="object-cover"
           />
         ) : null}

@@ -48,6 +48,26 @@ const server = createServer(async (req, res) => {
   // wrong catalogue without failing anything.
   res.setHeader("x-mock-fixtures", FIXTURES);
 
+  // The SDK's funnel measurement (page views, add to cart, checkout steps):
+  // fire-and-forget beacons the gateway acknowledges without a body. Answering
+  // them here keeps the misses below about the build's own reads.
+  const pathname = (req.url ?? "/").split("?")[0];
+  if (pathname === "/api/v1/website/funnel-event") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // REST reads the browser makes at runtime, such as the public configuration
+  // the website gate checks before mounting the store. Keyed by method and
+  // path, recorded like the GraphQL ones.
+  const rest = fixtures[`${req.method} ${pathname}`];
+  if (rest) {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify(rest));
+    return;
+  }
+
   let body = "";
   for await (const chunk of req) body += chunk;
 

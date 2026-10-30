@@ -1,6 +1,6 @@
 "use client";
 
-import { BacanoProvider } from "@bacano/sdk/react";
+import { BacanoProvider, BacanoWebsiteGate } from "@bacano/sdk/react";
 import { esES } from "@clerk/localizations";
 import { ClerkProvider, useAuth } from "@clerk/react";
 import type { ReactNode } from "react";
@@ -51,7 +51,26 @@ function BacanoAnonymous({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Bacano's "site under construction" screen, switched on per website in the
+ * platform, never in this repository.
+ *
+ * Outside everything else on purpose: while the screen is active nothing below
+ * it mounts, so Clerk and the SDK never initialise and no measurement fires.
+ * The exported HTML keeps the catalogue inside a `<noscript>` while the gate
+ * checks the configuration, so crawlers and visitors without JavaScript still
+ * see the store. A failure to read the configuration opens the site rather
+ * than taking it down. See STOREFRONT_CONSTRUCTION.md in @bacano/sdk.
+ */
 export function Providers({ children }: { children: ReactNode }) {
+  return (
+    <BacanoWebsiteGate config={{ apiUrl, websiteSlug }}>
+      <StorefrontProviders>{children}</StorefrontProviders>
+    </BacanoWebsiteGate>
+  );
+}
+
+function StorefrontProviders({ children }: { children: ReactNode }) {
   // Buyer auth is optional, and its absence is the common case.
   //
   // This used to mount ClerkProvider unconditionally. With an empty

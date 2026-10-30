@@ -1,5 +1,7 @@
 # Bacano Website Template
 
+> Guías en español: [`docs/`](./docs/README.md).
+
 Starting point for a customer storefront built on the [Bacano ERP](https://api.bacanoerp.com) via [`@bacano/sdk`](https://www.npmjs.com/package/@bacano/sdk).
 
 Next.js (static export) → S3 → CloudFront. No server, no cold starts, no runtime to patch.
@@ -53,7 +55,7 @@ Two tools, deliberately — they do different jobs and neither replaces the othe
 | **ESLint** | Next.js-specific rules (`next/core-web-vitals`) that Biome cannot express |
 
 ```bash
-pnpm verify        # fast gate: typecheck + biome + eslint + disclosure guard
+pnpm verify        # fast gate: typecheck + biome + eslint + disclosure guard + agent skills
 pnpm verify:all    # the above plus the storefront tests — what CI runs
 pnpm check:fix     # auto-fix formatting, imports and class order
 pnpm typecheck
@@ -154,7 +156,9 @@ These exist because breaking them is expensive later.
 ## Updating the SDK
 
 ```bash
-pnpm add @bacano/sdk@latest
+pnpm sdk:update
 ```
+
+This upgrades the package **and** reinstalls the agent skills it ships in `.agents/skills/`. A bare `pnpm add @bacano/sdk@latest` leaves agents reading the previous version's instructions; `pnpm verify` catches that.
 
 The SDK follows semver: a major bump means breaking changes — read the release notes. Generated sites do not receive template updates automatically; that is a deliberate trade-off for per-customer independence.

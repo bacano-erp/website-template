@@ -116,6 +116,26 @@ S3 serves `/about/index.html` for `/about/` but 404s for `/about`. Turning this
 off produces links that work in `next dev` and 404 in production — the worst
 possible failure mode.
 
+### 9. Keep the built-in pieces wired
+
+Every Bacano site needs these, so they ship mounted. Each one fails silently if
+it is unwired: the site still renders and nobody notices until a person needs
+it.
+
+- **Preview** (`/vista-previa/`) renders the views in `src/views/`. A page whose
+  markup lives inside its `page.tsx` cannot be previewed — put it in a view and
+  list its route in `src/features/preview/routes.ts`.
+- **Content locator**: every region whose copy comes from a Content entry is
+  wrapped in `ContentEntrySection`. Unmarked, Bacano's locator extension finds
+  nothing there.
+- **Construction gate**: `BacanoWebsiteGate` stays the outermost provider, above
+  Clerk and `BacanoProvider`. Inside them, the construction screen would load
+  the auth and measurement it exists to keep out.
+- **Images** declare `referrerPolicy="no-referrer"`, or Bacano storage refuses
+  them on localhost and preview hosts (`tests/unit/image-referrer.spec.ts`).
+
+What each does and why: [`docs/piezas-de-fabrica.md`](./docs/piezas-de-fabrica.md).
+
 ---
 
 ## How to work here
@@ -129,7 +149,7 @@ pnpm dev
 **Before claiming any change is done:**
 
 ```bash
-pnpm verify      # fast gate: typecheck + biome + eslint + disclosure guard
+pnpm verify      # fast gate: typecheck + biome + eslint + disclosure guard + agent skills
 pnpm test:e2e    # builds twice against fixtures and runs the storefront tests
 pnpm verify:all  # both — this is what CI runs
 ```
@@ -171,8 +191,9 @@ Client side (stock, cart, anything per-shopper):
 import { useCart, useProducts } from "@bacano/sdk/react";
 ```
 
-Building many static routes? Use `client.catalog.getStaticCatalogSnapshot()`
-once and index the result. Do **not** call `getProductBySlug()` per route in the
+Building many static routes? Read the catalogue once through
+`src/lib/static-catalog.ts` (`client.catalog.getStaticCatalogBootstrap()`) and
+index the result. Do **not** call `getProductBySlug()` per route in the
 same build — that is one network round trip per product.
 
 ---
@@ -183,6 +204,27 @@ The template ships deliberately **unstyled and neutral**. When applying a
 customer's visual identity, get the store working first, then style. Do not
 introduce a component library or CSS framework beyond what is already here
 without asking — it is a long-lived decision for someone else's codebase.
+
+---
+
+## SDK and agent skills
+
+The SDK's agent skills live in `.agents/skills/` (`bacano-web` for the
+pre-production audit, `bacano-figma-web` for building from Figma), with links
+for Claude and Codex. They come from the installed `@bacano/sdk`, so update both
+together:
+
+```bash
+pnpm sdk:update
+```
+
+`pnpm check:skills` (part of `verify`, and run by CI) fails while the skills
+belong to a different SDK version than the one installed. Never edit them by
+hand: the next update overwrites them.
+
+How the SDK is initialised here, and how sites have hit its rate limit:
+[`docs/sdk.md`](./docs/sdk.md). The rest of the Spanish guides are indexed in
+[`docs/README.md`](./docs/README.md).
 
 ---
 

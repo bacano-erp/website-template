@@ -70,6 +70,13 @@ test.describe("shapes that must never reach a public repository", () => {
     expect(flagged(sshRemote("some-agency", "their-store"))).toBe(true);
   });
 
+  test("only the listed open-source repositories pass, not their owners", () => {
+    // The SDK's Figma skill links one community project. Allowing that repo
+    // must not open its owner's other repositories, or anyone's.
+    expect(flagged(repoUrl("southleft", "figma-console-mcp"))).toBe(false);
+    expect(flagged(repoUrl("southleft", "another-repo"))).toBe(true);
+  });
+
   test("an AWS account id, alone or inside an ARN", () => {
     expect(flagged(`account ${accountId}`)).toBe(true);
     expect(flagged(arn)).toBe(true);

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bacano Web"
+  short_description: "Audita sitios Bacano antes de producción"
+  default_prompt: "Usa $bacano-web para evaluar si este sitio Bacano está listo para producción."

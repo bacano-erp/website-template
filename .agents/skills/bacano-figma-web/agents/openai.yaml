@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bacano Figma Web"
+  short_description: "Convierte diseños Figma en sitios Bacano"
+  default_prompt: "Usa $bacano-figma-web para implementar este diseño de Figma con el cascarón y los contratos oficiales de Bacano."

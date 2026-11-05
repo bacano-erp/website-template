@@ -133,6 +133,12 @@ it.
   the auth and measurement it exists to keep out.
 - **Images** declare `referrerPolicy="no-referrer"`, or Bacano storage refuses
   them on localhost and preview hosts (`tests/unit/image-referrer.spec.ts`).
+- **Business profile**: WhatsApp, phones, emails, social networks, branches and
+  opening hours come from the business's Ficha pública in Bacano through
+  `src/features/business` (`client.business.getProfile()`), never from code,
+  config or translations. The footer reads it even while it is empty and hides
+  each block until the business fills it in. Contract:
+  `node_modules/@bacano/sdk/STOREFRONT_BUSINESS_PROFILE.md`.
 
 What each does and why: [`docs/piezas-de-fabrica.md`](./docs/piezas-de-fabrica.md).
 

@@ -17,6 +17,29 @@ función apagada en un bloqueo artificial.
 - Ejecutar los controles definidos por el proyecto: instalación reproducible,
   typecheck, lint, pruebas, E2E disponibles y build de producción.
 
+## Datos del negocio
+
+Aplica a toda web Bacano, informativa o tienda. Contrato:
+`STOREFRONT_BUSINESS_PROFILE.md`.
+
+- `P0`: WhatsApp, teléfonos, correos, redes sociales, direcciones y horarios
+  salen de `client.business.getProfile()`, la Ficha pública de Bacano. Ninguno
+  está escrito en el código, la configuración o las traducciones. Buscar
+  `wa.me`, `api.whatsapp.com`, `tel:`, `mailto:` y dominios de redes
+  (`instagram.com`, `facebook.com`, `tiktok.com`…); cada hallazgo es `❌ FALLÓ`
+  salvo que venga del perfil.
+- `P0`: la web consulta el perfil aunque la empresa aún no lo haya llenado. Con
+  el perfil vacío oculta cada bloque (botón de WhatsApp, horarios, iconos de
+  redes, contacto) y no muestra datos de ejemplo ni de otro negocio.
+- `P1`: en un sitio estático el perfil se lee en el navegador (o queda en el
+  HTML del build y se refresca al cargar), porque la Ficha pública cambia sin
+  publicar el sitio.
+- `P1`: los horarios usan `openingHours`, `openingExceptions` y
+  `closedOnPublicHolidays` como indica el contrato; una sucursal sin horarios
+  no se muestra como cerrada.
+- Para probar con datos, llenar la Ficha pública de la empresa de prueba en
+  Bacano y verificar que la web la refleja sin cambios de código.
+
 ## Rutas y contenido
 
 - Inventariar rutas desde sitemap, export estático y router; no depender de una

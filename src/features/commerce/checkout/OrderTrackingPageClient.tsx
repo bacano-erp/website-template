@@ -3,7 +3,7 @@
 import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { createWhatsAppUrl, whatsAppEnabled } from "@/config/store";
+import { WhatsAppHelpLink } from "@/features/business/WhatsAppHelpLink";
 
 import { OrderTrackingView } from "@/features/commerce/checkout/OrderTrackingView";
 
@@ -38,12 +38,10 @@ export function OrderTrackingPageClient() {
           </p>
         </div>
         <div className="mx-auto grid w-full max-w-sm gap-3">
-          {whatsAppEnabled ? (
-            <a href={createWhatsAppUrl()} className="btn btn-cart w-full">
-              <MessageCircle size={18} strokeWidth={2.3} />
-              Necesito ayuda
-            </a>
-          ) : null}
+          <WhatsAppHelpLink className="btn btn-cart w-full">
+            <MessageCircle size={18} strokeWidth={2.3} />
+            Necesito ayuda
+          </WhatsAppHelpLink>
           <Link href="/catalogo/" className="btn btn-secondary w-full">
             Volver al catálogo
           </Link>

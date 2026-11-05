@@ -27,7 +27,7 @@
     "verify:all": "pnpm verify && pnpm test:e2e"
   },
   "dependencies": {
-    "@bacano/sdk": "^1.2.13",
+    "@bacano/sdk": "^1.2.16",
     "@clerk/localizations": "^4.13.3",
     "@clerk/react": "^6.12.3",
     "@heroui/react": "3.2.6",

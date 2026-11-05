@@ -61,7 +61,8 @@ Todo lo que pasa aquí puede ocurrir **después** de que el comprador pagó:
 | Cupones | Bacano |
 | Legales que se aceptan al pagar | Bacano (configuración legal del website) |
 | Cuentas de comprador (Clerk) | Bacano: se activan por website |
-| Nombre de la tienda, logo del checkout, WhatsApp de ayuda | `src/config/store.ts` |
+| Nombre de la tienda, logo del checkout, mensaje de WhatsApp | `src/config/store.ts` |
+| WhatsApp, teléfonos, correos, redes, sucursales y horarios | Ficha pública en Bacano (`client.business.getProfile()`, `src/features/business`) |
 | Colores | El tema de HeroUI en `src/app/globals.css` |
 
 ## Cambiar el aspecto

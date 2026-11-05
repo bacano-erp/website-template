@@ -14,7 +14,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { createWhatsAppUrl, whatsAppEnabled } from "@/config/store";
+import { WhatsAppHelpLink } from "@/features/business/WhatsAppHelpLink";
 
 import { formatMoneyCOP } from "@/lib/bacano/formatters";
 import { CheckoutPostPurchaseAccountPrompt } from "./CheckoutPostPurchaseAccountPrompt";
@@ -206,14 +206,9 @@ export function CheckoutSuccessView({
                 <ShoppingBag size={18} strokeWidth={2.3} />
                 Seguir comprando
               </Link>
-              {whatsAppEnabled ? (
-                <a
-                  href={createWhatsAppUrl()}
-                  className="btn btn-secondary w-full"
-                >
-                  Necesito ayuda
-                </a>
-              ) : null}
+              <WhatsAppHelpLink className="btn btn-secondary w-full">
+                Necesito ayuda
+              </WhatsAppHelpLink>
             </div>
           </aside>
         </div>

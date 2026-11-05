@@ -61,6 +61,12 @@ const ALLOWED_HOSTS = new Set([
   // Public services the storefront itself links to: WhatsApp help links, and
   // the video hosts a Content rich-text field may embed.
   "wa.me",
+  // Social networks the business keeps in its Ficha pública and the footer
+  // links to; the bacano-web checklist names them as hardcoding to search for.
+  "whatsapp.com",
+  "instagram.com",
+  "facebook.com",
+  "tiktok.com",
   "youtube.com",
   "youtube-nocookie.com",
   "vimeo.com",

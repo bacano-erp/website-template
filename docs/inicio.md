@@ -28,7 +28,6 @@ Todo lo que hay aquí llega al navegador: solo existen variables
 | `NEXT_PUBLIC_BACANO_WEBSITE_SLUG` | El slug del website |
 | `NEXT_PUBLIC_SITE_URL` | La URL pública del sitio. Obligatoria: sin ella las URLs canónicas apuntarían a localhost |
 | `NEXT_PUBLIC_SITE_NAME` | El nombre que se muestra |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Opcional, solo en local. Con número, el checkout y el pedido ofrecen ayuda por WhatsApp. El deploy de Bacano no la inyecta: en producción el número va en `src/config/store.ts` |
 
 En local se copian de `.env.example` a `.env.local`. En CI y en el deploy las
 inyecta Bacano como variables del repositorio al aprovisionar el sitio.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { storeConfig } from "@/config/store";
+import { BusinessFooter } from "@/features/business/BusinessFooter";
 // <commerce>
 import { CartButton } from "@/features/commerce/cart/CartButton";
 import { CheckoutHeader } from "@/features/commerce/checkout/CheckoutHeader";
@@ -71,8 +72,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
       )}
 
       <footer className="mt-16 border-border border-t">
-        <div className="mx-auto max-w-5xl px-4 py-8 text-muted text-sm">
-          © {new Date().getFullYear()} {storeConfig.name}
+        <div className="mx-auto grid max-w-5xl gap-6 px-4 py-8 text-muted text-sm">
+          {/* WhatsApp, contact, networks and hours: Bacano's Ficha pública. */}
+          <BusinessFooter />
+          <p>
+            © {new Date().getFullYear()} {storeConfig.name}
+          </p>
         </div>
       </footer>
     </>

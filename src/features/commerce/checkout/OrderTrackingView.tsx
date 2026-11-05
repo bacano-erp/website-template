@@ -4,7 +4,7 @@ import type { PublicOrder } from "@bacano/sdk";
 import { MessageCircle, PackageCheck, PackageSearch } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createWhatsAppUrl, whatsAppEnabled } from "@/config/store";
+import { WhatsAppHelpLink } from "@/features/business/WhatsAppHelpLink";
 
 import { getBacanoBrowserClient } from "@/lib/bacano/browser-client";
 import { getBacanoStorageFileUrl } from "@/lib/bacano/media";
@@ -114,12 +114,10 @@ export function OrderTrackingView({
           </p>
         </div>
         <div className="mx-auto grid w-full max-w-sm gap-3">
-          {whatsAppEnabled ? (
-            <a href={createWhatsAppUrl()} className="btn btn-cart w-full">
-              <MessageCircle size={18} strokeWidth={2.3} />
-              Necesito ayuda
-            </a>
-          ) : null}
+          <WhatsAppHelpLink className="btn btn-cart w-full">
+            <MessageCircle size={18} strokeWidth={2.3} />
+            Necesito ayuda
+          </WhatsAppHelpLink>
           <Link href="/catalogo/" className="btn btn-secondary w-full">
             Volver al catálogo
           </Link>

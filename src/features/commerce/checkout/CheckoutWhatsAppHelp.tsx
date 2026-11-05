@@ -1,10 +1,19 @@
+"use client";
+
+import { MessageCircle } from "lucide-react";
+
+import { useWhatsAppLink } from "@/features/business/business-profile";
+
+/** Shown only when the business has a WhatsApp in its Ficha pública. */
 export function CheckoutWhatsAppHelp({
-  href,
+  message,
   onClick,
 }: {
-  href: string;
+  message: string;
   onClick?: () => void;
 }) {
+  const href = useWhatsAppLink(message);
+  if (!href) return null;
   return (
     <a
       href={href}
@@ -24,5 +33,3 @@ export function CheckoutWhatsAppHelp({
     </a>
   );
 }
-
-import { MessageCircle } from "lucide-react";

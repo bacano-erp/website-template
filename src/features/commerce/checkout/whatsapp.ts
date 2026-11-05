@@ -1,9 +1,10 @@
-import { createWhatsAppUrl, storeConfig } from "@/config/store";
+import { storeConfig } from "@/config/store";
 import type { LocalCartItem } from "@/features/commerce/cart/local-cart";
 import { formatMoneyCOP } from "@/lib/bacano/formatters";
 import { getProductVariantUrl } from "@/lib/bacano/urls";
 
-export function createCheckoutWhatsAppUrl({
+/** The WhatsApp message that hands the cart over to the store. */
+export function createCheckoutWhatsAppMessage({
   deliveryLabel,
   departmentName,
   items,
@@ -41,5 +42,5 @@ export function createCheckoutWhatsAppUrl({
     }),
   ].filter((line): line is string => Boolean(line));
 
-  return createWhatsAppUrl(lines.join("\n"));
+  return lines.join("\n");
 }

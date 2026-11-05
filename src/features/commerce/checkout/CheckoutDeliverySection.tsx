@@ -11,7 +11,7 @@ import { ChevronDown, Store } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 
 import { FormAutocomplete, FormTextField } from "@/components/form";
-import { storeConfig } from "@/config/store";
+import { useBusinessProfile } from "@/features/business/business-profile";
 import {
   formatDeliveryOrderCountdown,
   formatEstimatedDeliveryDate,
@@ -405,7 +405,11 @@ function SelectedPickupDetails({ option }: { option: WebsiteDeliveryOption }) {
   // is hardcoded: a store with two branches would otherwise show one branch's
   // address for both.
   const pickup = option.pickupInfo;
-  const address = pickup?.address ?? storeConfig.contact.addressLine;
+  const profile = useBusinessProfile();
+  const address =
+    pickup?.address ??
+    profile?.branches.find((branch) => branch.isWebsiteBranch)?.address ??
+    null;
 
   return (
     <article className="grid min-h-[120px] content-center gap-2 rounded-md border border-border bg-surface px-4 py-3 sm:px-5">

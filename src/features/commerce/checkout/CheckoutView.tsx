@@ -23,7 +23,7 @@ import {
 
 import { useBuyerAccounts } from "@/features/account/BuyerAccountsProvider";
 import { useCart } from "@/features/commerce/cart/CartProvider";
-import { createCheckoutWhatsAppUrl } from "@/features/commerce/checkout/whatsapp";
+import { createCheckoutWhatsAppMessage } from "@/features/commerce/checkout/whatsapp";
 import { getBacanoBrowserClient } from "@/lib/bacano/browser-client";
 import { formatMoneyCOP } from "@/lib/bacano/formatters";
 import { CheckoutAuthPrefill } from "./CheckoutAuthPrefill";
@@ -1158,7 +1158,7 @@ export function CheckoutView({ mode = "classic" }: CheckoutViewProps = {}) {
 
   const whatsappHelp = (
     <CheckoutWhatsAppHelp
-      href={createCheckoutWhatsAppUrl({
+      message={createCheckoutWhatsAppMessage({
         deliveryLabel: selectedDeliveryOption?.label,
         departmentName: selectedDepartment?.departmentName,
         items,

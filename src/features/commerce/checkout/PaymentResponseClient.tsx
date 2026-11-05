@@ -5,7 +5,7 @@ import { AlertCircle, CheckCircle2, LoaderCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { createWhatsAppUrl, whatsAppEnabled } from "@/config/store";
+import { WhatsAppHelpLink } from "@/features/business/WhatsAppHelpLink";
 import {
   getOrderPaymentStatus,
   pollPublicOrder,
@@ -173,18 +173,16 @@ export function PaymentResponseClient() {
           <Link href="/catalogo/" className="btn btn-secondary w-full">
             Seguir comprando
           </Link>
-          {whatsAppEnabled ? (
-            <a
-              href={createWhatsAppUrl(
-                orderId
-                  ? `Hola, necesito ayuda con el pago de mi pedido ${displayState.order?.orderNumber ?? orderId}`
-                  : undefined,
-              )}
-              className="text-muted text-sm underline"
-            >
-              Necesito ayuda
-            </a>
-          ) : null}
+          <WhatsAppHelpLink
+            message={
+              orderId
+                ? `Hola, necesito ayuda con el pago de mi pedido ${displayState.order?.orderNumber ?? orderId}`
+                : undefined
+            }
+            className="text-muted text-sm underline"
+          >
+            Necesito ayuda
+          </WhatsAppHelpLink>
         </div>
       </section>
     </main>

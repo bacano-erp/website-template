@@ -22,6 +22,13 @@ corta y esperar: **“¿Esta web será informativa o una tienda virtual?”**
 No aplicar la lista transaccional a una web informativa. Si un sitio híbrido
 permite comprar, clasificarlo como tienda virtual.
 
+Si el proyecto salió de la plantilla de Bacano y todavía tiene
+`scripts/setup-site.mjs`, la respuesta también define el código: aplicarla con
+`pnpm setup:site --tipo=tienda` o `pnpm setup:site --tipo=sitio` antes de
+construir. `--tipo=sitio` quita carrito, checkout, pago y pedido; es de una sola
+vía, así que nunca correrlo sin la respuesta explícita. Las cuentas de
+comprador no se preguntan aquí: se activan por website en Bacano.
+
 Después construir primero la matriz arquitectónica definida en
 [references/architecture-runtime.md](references/architecture-runtime.md):
 catálogo estático, estado dinámico de productos, configuración pública, vista
@@ -46,8 +53,8 @@ Después leer solo:
 
 Si `@bacano/sdk` está disponible, leer sus contratos canónicos aplicables antes
 de proponer cambios. Como mínimo revisar `STOREFRONT_LEGAL.md`,
-`STOREFRONT_MARKETING.md`, `STOREFRONT_PERFORMANCE.md` y
-`STOREFRONT_PREVIEW.md`; si el sitio renderiza Bacano Content, leer también y
+`STOREFRONT_BUSINESS_PROFILE.md`, `STOREFRONT_MARKETING.md`,
+`STOREFRONT_PERFORMANCE.md` y `STOREFRONT_PREVIEW.md`; si el sitio renderiza Bacano Content, leer también y
 aplicar obligatoriamente `STOREFRONT_CONTENT_LOCATOR.md`; añadir
 `AUTHENTICATION.md`, `STOREFRONT_LEADS.md`, `STOREFRONT_CLARITY.md` y
 otros contratos únicamente cuando esas capacidades existan. Leer
@@ -84,6 +91,8 @@ ejecutar compras/pagos sin autorización explícita.
 2. Registrar la matriz de capacidades y cuáles son críticas para el
    lanzamiento actual.
 3. Identificar una sola fuente para Bacano, Content, legal, marketing y auth.
+   WhatsApp, teléfonos, correos, redes, sucursales y horarios salen solo de
+   `client.business.getProfile()` (`STOREFRONT_BUSINESS_PROFILE.md`).
 4. Ejecutar typecheck, lint, pruebas y build usando los comandos del proyecto.
 5. Comparar router, salida del build y sitemap; ninguna ruta pública debe
    omitirse silenciosamente.

@@ -16,6 +16,10 @@ Antes de extraer el diseño, identificar:
 - Web informativa, tienda virtual o sitio híbrido. Si permite una compra
   completa, aplicar también los contratos de tienda a su superficie
   transaccional.
+  Si el proyecto parte de la plantilla de Bacano (tiene
+  `scripts/setup-site.mjs`), aplicar esa respuesta con `pnpm setup:site
+  --tipo=tienda` o `--tipo=sitio` antes de implementar; `--tipo=sitio` quita la
+  tienda y no se deshace, así que exige la respuesta explícita del usuario.
 - Enlace al archivo, página, sección o frame de Figma.
 - Rutas que se implementarán y sus frames desktop/mobile.
 - Repositorio y cascarón Bacano que se reutilizarán.

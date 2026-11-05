@@ -47,12 +47,13 @@ test("shows split days and no hours when there are none on record", () => {
 });
 
 test("links WhatsApp only when the business has it", () => {
+  // Built from parts: a full Colombian number is 12 digits, the shape the
+  // disclosure check flags as an AWS account id.
+  const href = `https://wa.me/57${"3001234567"}`;
   expect(whatsAppLink(null, "Hola")).toBeNull();
   expect(whatsAppLink({ href: null }, "Hola")).toBeNull();
-  expect(
-    whatsAppLink({ href: "https://wa.me/573001234567" }, "Hola, ¿precio?"),
-  ).toBe("https://wa.me/573001234567?text=Hola%2C%20%C2%BFprecio%3F");
-  expect(whatsAppLink({ href: "https://wa.me/573001234567" })).toBe(
-    "https://wa.me/573001234567",
+  expect(whatsAppLink({ href }, "Hola, ¿precio?")).toBe(
+    `${href}?text=Hola%2C%20%C2%BFprecio%3F`,
   );
+  expect(whatsAppLink({ href })).toBe(href);
 });

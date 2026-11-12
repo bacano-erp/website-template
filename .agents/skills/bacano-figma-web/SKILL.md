@@ -97,7 +97,9 @@ Figma, desde Bacano Content o desde ambas fuentes.
 - No codificar textos editables si pertenecen a Bacano Content.
 - Marcar obligatoriamente cada región visual proveniente de un `ContentEntry`
   con `getContentEntryLocatorAttributes(entry)`. El marcador identifica la
-  entrada completa, nunca campos individuales. Conservar esta identidad al
+  entrada completa; dentro de ella, cada texto o imagen que sale de un campo
+  lleva `getContentFieldLocatorAttributes(<ruta>)` con la ruta del campo en el
+  editor (`title`, `hero.image`, `items.0.text`). Conservar esta identidad al
   transformar Content en view models y seguir
   `STOREFRONT_CONTENT_LOCATOR.md`.
 - No alterar el storefront de referencia salvo que ese sea el proyecto indicado.

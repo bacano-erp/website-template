@@ -34,7 +34,10 @@ responsable, reutilización o repetición propios. Crear un componente compartid
 solo cuando coincidan tanto la estructura como el significado y la abstracción
 reduzca duplicación real.
 
-- Usar grupos para organizar entradas relacionadas por dominio o página.
+- Usar grupos para organizar entradas relacionadas por dominio o página, y asignar
+  cada entrada a su grupo. "General" no es un valor de relleno. El nombre de un
+  grupo no se puede repetir (ver "Cómo asignar grupos" en
+  `CONTENT_TYPE_MANAGEMENT.md`).
 - Usar repetibles para pasos, integrantes, preguntas, tarjetas y otras
   colecciones homogéneas.
 - Mantener directamente en el tipo los campos de un bloque exclusivo y simple.
@@ -44,8 +47,10 @@ reduzca duplicación real.
   deben converger en el mismo view model.
 - Conservar en ese view model los atributos producidos por
   `getContentEntryLocatorAttributes(entry)`. Toda región visual administrada
-  por una entrada debe exponerlos en su contenedor DOM exterior; no se marcan
-  campos individuales.
+  por una entrada debe exponerlos en su contenedor DOM exterior. Los textos e
+  imágenes que salen de un campo llevan además
+  `getContentFieldLocatorAttributes(<ruta>)`, con la ruta del campo en el
+  editor; el view model conserva esa ruta junto al valor.
 
 ## 2. Elegir el punto de partida
 
@@ -204,16 +209,21 @@ escribir:
 4. Mostrar el plan y esperar aprobación cuando altere estructuras existentes.
 5. Crear primero listas y componentes, luego tipos consumidores, y mantener las
    estructuras nuevas en borrador hasta validarlas.
-6. Si se concedió `content_entries:manage`, inventariar entradas por tipo, key y
-   locale; crear las faltantes en borrador y actualizar únicamente con
-   `expectedUpdatedAt`.
-7. No fusionar por nombres, no usar HTML crudo y no relacionar URLs remotas. La
+6. Si se concedió `content_entries:manage`, consultar `listTags()` y crear con
+   `createTag()` las etiquetas que falten antes de asignarlas con `tagIds`. Los
+   botones de WhatsApp, teléfono, correo y redes usan la Ficha pública (`source:
+   "profile"`, ver `CONTENT_TYPE_MANAGEMENT.md`), no un número escrito.
+7. Si se concedió `content_entries:manage`, inventariar entradas por tipo, key y
+   locale; crear con `createGroup()` los grupos que falten, sin repetir nombres;
+   crear las entradas faltantes en borrador con su `categoryKey` y actualizar
+   únicamente con `expectedUpdatedAt`.
+8. No fusionar por nombres, no usar HTML crudo y no relacionar URLs remotas. La
    media debe existir en Bacano y pertenecer a la empresa autorizada; resolver
    su `fileId` mediante `listMedia()` o `uploadImage()`.
-8. Para archivar o eliminar tipos, entradas, grupos o listas, inspeccionar
+9. Para archivar o eliminar tipos, entradas, grupos o listas, inspeccionar
    dependencias y confirmar nuevamente. Una actualización de lista debe enviar
    todos los elementos que deben permanecer, incluidos sus IDs existentes.
-9. Publicar o modificar una entrada publicada solo con
+10. Publicar o modificar una entrada publicada solo con
    `content_entries:publish` y una aprobación humana explícita.
 
 Nunca exponer el token en el navegador, commit, blueprint, salida de consola o

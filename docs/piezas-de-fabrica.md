@@ -24,14 +24,19 @@ Guía completa: `STOREFRONT_PREVIEW.md` del SDK.
 ## Localizador de Content
 
 La extensión de Chrome *Bacano Content Locator* señala una región del sitio y
-abre directamente la entrada de Content que la escribe. Solo funciona si la
-región está marcada.
+abre directamente la entrada de Content que la escribe; si se hace clic sobre
+un texto o una imagen con marca de campo, abre el editor en ese campo. Solo
+funciona si la región está marcada.
 
 - Toda región cuyo contenido sale de una entrada de Content se envuelve en
   `ContentEntrySection` (`src/components/content/ContentEntrySection.tsx`),
   que pone los cuatro atributos `data-bacano-*`.
-- Se marca el bloque una vez (sección, banner, tarjeta), no su título ni su
-  botón. Una tarjeta que sale de otra entrada lleva su propia sección anidada.
+- Se marca el bloque una vez (sección, banner, tarjeta). Una tarjeta que sale
+  de otra entrada lleva su propia sección anidada.
+- Dentro del bloque, cada texto o imagen que sale de un campo lleva
+  `getContentFieldLocatorAttributes(...)` de `@bacano/sdk` con la ruta del
+  campo en el editor: `title`, `hero.image`, `items.0.text` (fila desde 0).
+  Es opcional: sin marca de campo, el clic abre la entrada como siempre.
 - No se marcan productos del catálogo, documentos legales ni textos propios del
   código: no son Content.
 

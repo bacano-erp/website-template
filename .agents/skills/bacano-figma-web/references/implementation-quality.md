@@ -63,8 +63,10 @@ no habilita funciones transaccionales o marketing.
 Al mapear un `ContentEntry`, conservar los atributos retornados por
 `getContentEntryLocatorAttributes(entry)` hasta el componente visual. Aplicar
 el spread al `section`, `article`, banner o tarjeta exterior que representa la
-entrada. No repetirlo en cada título o párrafo. Si una tarjeta proviene de otra
-entrada referenciada, esa tarjeta lleva su propio marcador anidado.
+entrada. No repetirlo en cada título o párrafo: esos llevan la marca de campo,
+`getContentFieldLocatorAttributes("title")` o `("items", index, "text")`, con
+la ruta del campo en el editor. Si una tarjeta proviene de otra entrada
+referenciada, esa tarjeta lleva su propio marcador anidado.
 
 La salida final debe cumplir `STOREFRONT_CONTENT_LOCATOR.md`. Verificar el HTML
 generado; encontrar la llamada al helper en TypeScript no demuestra que el

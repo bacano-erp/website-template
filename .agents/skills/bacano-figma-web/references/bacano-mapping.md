@@ -19,7 +19,8 @@ checkout, auth u otra operación documentada del SDK.
 - Usar componentes y tokens existentes antes de crear otros.
 - Mapear textos/imágenes editoriales a Content cuando deban ser administrables.
 - Para cada fuente `ContentEntry`, conservar y renderizar el marcador de entrada
-  definido en `STOREFRONT_CONTENT_LOCATOR.md`; no bajar a nivel de campo.
+  definido en `STOREFRONT_CONTENT_LOCATOR.md`, y la marca de campo en cada
+  texto o imagen que sale de un campo.
 - Si el equipo de Content y desarrollo trabajan en tiempos distintos, seguir
   [content-workflow.md](content-workflow.md) y mantener un único contrato de
   datos entre fixtures temporales y Bacano real.

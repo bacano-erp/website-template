@@ -31,6 +31,9 @@ Aplica a toda web Bacano, informativa o tienda. Contrato:
 - `P0`: la web consulta el perfil aunque la empresa aún no lo haya llenado. Con
   el perfil vacío oculta cada bloque (botón de WhatsApp, horarios, iconos de
   redes, contacto) y no muestra datos de ejemplo ni de otro negocio.
+- `P0`: un botón que viene de Content puede llegar sin su campo `link` cuando la
+  Ficha pública ya no tiene ese dato, aunque el campo sea obligatorio. La web
+  oculta el botón; no asume que el enlace existe.
 - `P1`: en un sitio estático el perfil se lee en el navegador (o queda en el
   HTML del build y se refresca al cargar), porque la Ficha pública cambia sin
   publicar el sitio.
@@ -54,7 +57,10 @@ Aplica a toda web Bacano, informativa o tienda. Contrato:
 - Validar estados vacío, loading, error y ausencia de Content opcional.
 - `P0`: toda región visual cuya fuente sea un `ContentEntry` expone en el HTML
   final el marcador de `STOREFRONT_CONTENT_LOCATOR.md`, con la key, nombre y
-  locale de la entrada fuente. El control es por entrada completa, no por campo.
+  locale de la entrada fuente. Los textos e imágenes que salen de un campo
+  llevan además `data-bacano-content-field` con la ruta del editor
+  (`title`, `hero.image`, `items.0.text`), dentro del elemento de su entrada.
+  Una ruta mal escrita no rompe nada, pero abre el editor arriba: comprobarla.
 - Comparar inventario de entradas y regiones. Permitir marcadores repetidos si
   una entrada aparece en varios lugares y marcadores anidados cuando una tarjeta
   proviene de otra entrada referenciada. No exigirlos a código/i18n, catálogo,
@@ -138,3 +144,7 @@ Aplica a toda web Bacano, informativa o tienda. Contrato:
   acciones externas para completarse.
 - Verificar que el equipo conoce qué cambios requieren rebuild/despliegue y que
   existe un mecanismo reproducible para ejecutarlo y revertirlo.
+
+## Tiempo estimado de entrega
+
+`checkout.getShippingQuotes()` trae en cada cotizacion `estimatedDelivery` (texto listo, por ejemplo "lunes, 9 de noviembre") y `deliveryEstimate` (`businessDays`, `estimatedDate`, `orderBy`). Muestra la fecha que entrega Bacano y usa `orderBy` para el contador de "Haz tu pedido en las proximas...". Si vienen en `null`, la tienda no definio dias para ese destino: no muestres una fecha propia ni escribas reglas de dias, horas de corte o festivos en la web.

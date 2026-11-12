@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@bacano/sdk':
-        specifier: ^1.2.16
-        version: 1.2.16(react@19.2.5)
+        specifier: ^1.2.20
+        version: 1.2.20(react@19.2.5)
       '@clerk/localizations':
         specifier: ^4.13.3
         version: 4.13.10(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -174,8 +174,8 @@ packages:
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
 
-  '@bacano/sdk@1.2.16':
-    resolution: {integrity: sha512-cO/4BAbPB2DMge6XT9XdkM9jBFQwsXw290/Ml/ro8Hvb4zDWGxzPUXnFYP0HKYUf+CC0Hto7rVzddxQM7J/Ihg==}
+  '@bacano/sdk@1.2.20':
+    resolution: {integrity: sha512-D5Cz3EqljBgzcz1CKk2NgN7YpJujuO3e8hALnt097rvzh9YV0+O89n6V+N+4zesXCpL8lLW/yp2oczUeEcRp0Q==}
     hasBin: true
     peerDependencies:
       react: '>=18.0.0'
@@ -2871,7 +2871,7 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@bacano/sdk@1.2.16(react@19.2.5)':
+  '@bacano/sdk@1.2.20(react@19.2.5)':
     optionalDependencies:
       react: 19.2.5
 

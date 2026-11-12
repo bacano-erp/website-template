@@ -127,7 +127,10 @@ it.
   list its route in `src/features/preview/routes.ts`.
 - **Content locator**: every region whose copy comes from a Content entry is
   wrapped in `ContentEntrySection`. Unmarked, Bacano's locator extension finds
-  nothing there.
+  nothing there. Inside it, each text or image that comes from one field takes
+  `getContentFieldLocatorAttributes(<editor path>)` from `@bacano/sdk`
+  (`title`, `hero.image`, `items.0.text`), so the extension opens the editor on
+  that field.
 - **Construction gate**: `BacanoWebsiteGate` stays the outermost provider, above
   Clerk and `BacanoProvider`. Inside them, the construction screen would load
   the auth and measurement it exists to keep out.

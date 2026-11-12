@@ -15,9 +15,13 @@ type Element = "section" | "article" | "aside" | "div";
  * so every editorial block goes through this component rather than spreading
  * the attributes by hand, and none is forgotten.
  *
- * Mark the block once, not its title or button. A card that comes from another
- * referenced entry gets its own nested section. Catalogue products, legal
- * documents and the template's own text are not Content and are never marked.
+ * Mark the block once. A card that comes from another referenced entry gets
+ * its own nested section. Inside the block, each text or image that comes from
+ * one field takes `getContentFieldLocatorAttributes("title")` (or
+ * `("items", index, "image")`) from @bacano/sdk, so the extension opens the
+ * editor on that field; without it, the click opens the entry as before.
+ * Catalogue products, legal documents and the template's own text are not
+ * Content and are never marked.
  * See STOREFRONT_CONTENT_LOCATOR.md in @bacano/sdk.
  */
 export function ContentEntrySection({

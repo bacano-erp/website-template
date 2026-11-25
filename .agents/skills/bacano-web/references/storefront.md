@@ -42,6 +42,62 @@ Aplicar además de los controles comunes.
   editorial del snapshot.
 - Recomendaciones y relacionados no bloquean el contenido principal.
 
+## P0 · Funciones comerciales listas aunque hoy no se usen
+
+El comercio las activa desde Bacano sin avisar a quien hizo la web, y la tienda
+debe mostrarlas desde ese momento. Ciudad Móvil tenía grupos de productos en
+Bacano y su web no los mostraba; se corrigió copiando el selector de grupos de
+otra tienda. Auditar estas tres funciones siempre, también cuando estén
+apagadas:
+
+- `❌ FALLÓ` si el website ya la usa y la tienda no la muestra.
+- `⚠️ ADVERTENCIA` si todavía no se usa y la tienda no está lista para cuando
+  se active.
+- `✅ APROBADO` si está implementada y se probó con datos reales o con un
+  fixture que simule la activación (prueba, story o build local).
+- Nunca `➖ NO APLICA` en una tienda virtual: que hoy no se use no exime de
+  tenerla lista.
+
+**Grupos de productos** (`Product.optionGroup`)
+
+- Uso real: algún producto del snapshot (`getStaticCatalogBootstrap()`) con
+  `optionGroup` y más de un miembro.
+- La ficha del producto muestra el selector del grupo: `members` ordenados por
+  `sortOrder`, rótulo `displayLabel ?? name` y miniatura de `media` cuando
+  exista. Cada miembro con `slug` enlaza a su `/producto/{slug}`; uno sin
+  `slug` (no publicado en este website) no se enlaza. El producto actual queda
+  marcado (`aria-current`) y no enlaza a sí mismo.
+- Sin `optionGroup`, o con un solo miembro, no se muestra nada.
+- Sale del snapshot estático, en el HTML inicial, sin consultar cada miembro.
+- Referencia: `ProductOptionGroupPicker` de la tienda de Babyrex
+  (babyrex-bacano), el que se copió para Ciudad Móvil.
+
+**Precio de oferta** (`SALE`, en `variant.pricing`)
+
+- Uso real: alguna variante del snapshot con `pricing.hasDiscount`.
+- Tarjetas, ficha, relacionados y búsqueda muestran `pricing.currentPrice` y,
+  si `hasDiscount`, `pricing.regularPrice` tachado (y, si se quiere,
+  `discountPercentage`).
+- En el carrito y el checkout, una línea con `resolvedPriceType: "SALE"`
+  muestra `unitPrice` y el precio normal tachado, tomado de
+  `resolveProductPricing(item.productVariant.prices).regularPrice`. Ojo:
+  `baseUnitPrice` y `unitSavings` miden solo el ahorro por cantidad; en una
+  oferta sin mayoreo valen lo mismo que el precio de oferta y 0.
+- No interpretar `variant.prices` a mano: el SDK ya descarta un `SALE` que no
+  sea menor que el precio normal. JSON-LD, feed y eventos usan el mismo
+  `currentPrice`.
+
+**Precio por cantidad / mayoreo** (`STOREFRONT_VOLUME_PRICING.md`)
+
+- Uso real: `getWebsitePublicConfig().volumePricing.enabled` del website.
+- Aplicar el contrato completo: el carrito pinta `unitPrice`, `lineTotal` y
+  los totales de Bacano; muestra `baseUnitPrice` tachado con ahorro, el nivel
+  aplicado y el mensaje de progreso con `remainingQuantity` (rótulo desde
+  `priceTypeAliases`); el nuevo total se confirma tras la respuesta de
+  `setItem()`.
+- Con `enabled: false` no aparece ninguna comunicación de mayoreo.
+- La tienda nunca calcula ni fuerza el precio por cantidad.
+
 ## P0 · SEO comercial
 
 - Cada producto público tiene título, descripción, canonical, Open Graph,
@@ -91,6 +147,13 @@ Aplicar además de los controles comunes.
   entregado por el primero; no asumir que un debounce evita todas las carreras.
 - Probar alta, baja, cambios de cantidad, límites de stock, cupón, envío gratis,
   impuestos, moneda y redondeo.
+- Con un cupón aplicado, el resumen cuadra: Subtotal − Descuento + IVA (si se
+  muestra aparte) + Envío = total mostrado = monto que se envía a la pasarela.
+  `totals.subtotal` es el valor antes de descuentos desde `@bacano/sdk` 1.2.21;
+  hasta la 1.2.20 venía neto, y una tienda que resta el descuento lo descontaba
+  dos veces (Ciudad Móvil, noviembre de 2026). En una versión anterior,
+  `❌ FALLÓ` si el resumen no cuadra: actualizar el SDK o mostrar
+  `totals.total + totals.discount` como subtotal.
 - Probar solo los modos activos entre COUNTER, PICKUP y SHIPPING; propia y
   transportadora cuando apliquen, incluyendo contraentrega y pagos parciales.
 - Verificar errores accionables, idempotencia y doble clic/reintento.

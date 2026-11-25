@@ -42,6 +42,14 @@ Una capacidad inactiva no bloquea la salida y sus pruebas son `NO APLICA`, no
 `NO VERIFICADO`. Una capacidad activa y visible debe probarse en proporción a
 su riesgo.
 
+Excepción en tiendas virtuales: **grupos de productos, precio de oferta y
+precio por cantidad** se auditan aunque hoy no se usen, porque el comercio los
+activa desde Bacano sin tocar la web. `❌ FALLÓ` si ya se usan y la tienda no
+los muestra; `⚠️ ADVERTENCIA` si la tienda no está lista para cuando se
+activen. Nunca `➖ NO APLICA`. Criterios en
+[references/storefront.md](references/storefront.md), sección “Funciones
+comerciales listas aunque hoy no se usen”.
+
 ## 2. Leer los contratos aplicables
 
 Leer siempre [references/common.md](references/common.md) y
@@ -59,6 +67,8 @@ aplicar obligatoriamente `STOREFRONT_CONTENT_LOCATOR.md`; añadir
 `AUTHENTICATION.md`, `STOREFRONT_LEADS.md`, `STOREFRONT_CLARITY.md` y
 otros contratos únicamente cuando esas capacidades existan. Leer
 `STOREFRONT_CONSTRUCTION.md` cuando el website permita ocultarse temporalmente.
+En una tienda virtual leer siempre `STOREFRONT_VOLUME_PRICING.md`, esté o no
+activo el precio por cantidad.
 Si la tienda acepta pagos, leer obligatoriamente `STOREFRONT_PAYMENTS.md` antes
 de implementar, depurar o auditar checkout, retorno, reintentos o webhooks.
 Para un carrito lento o una navegación a checkout que se queda esperando,

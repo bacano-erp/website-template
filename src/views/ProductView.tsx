@@ -5,6 +5,7 @@ import { AddToCart } from "@/components/AddToCart";
 // </commerce>
 import { LivePrice } from "@/components/LivePrice";
 import { Markdown } from "@/components/Markdown";
+import { ProductOptionGroupPicker } from "@/components/ProductOptionGroupPicker";
 
 /**
  * One product's markup.
@@ -54,6 +55,8 @@ export function ProductView({ product }: { product: Product }) {
             bakedHasDiscount={pricing.hasDiscount}
           />
         )}
+
+        <ProductOptionGroupPicker product={product} />
 
         {product.description && <Markdown>{product.description}</Markdown>}
 

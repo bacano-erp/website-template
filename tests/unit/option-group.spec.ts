@@ -13,7 +13,7 @@ const media = (name: string): ProductMedia[] =>
       id: `media-${name}`,
       order: 0,
       mediaKind: "image",
-      thumbnailUrl: `https://cdn.example/${name}-thumb.webp`,
+      thumbnailUrl: `https://cdn.example.com/${name}-thumb.webp`,
     },
   ] as unknown as ProductMedia[];
 
@@ -93,7 +93,7 @@ test("uses the product's own image when its member entry has none", () => {
   );
 
   expect(view?.choices.map((choice) => choice.thumbnailUrl)).toEqual([
-    "https://cdn.example/rojo-own-thumb.webp",
+    "https://cdn.example.com/rojo-own-thumb.webp",
     null,
   ]);
 });

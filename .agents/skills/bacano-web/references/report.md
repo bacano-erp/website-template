@@ -19,6 +19,11 @@ Antes del dictamen incluir una tabla corta:
 No exigir pruebas a una capacidad `INACTIVA`. Una capacidad `BLOQUEADA` debe
 explicar la dependencia ausente y su impacto.
 
+En una tienda virtual añadir siempre tres filas, aunque estén apagadas:
+grupos de productos, precio de oferta y precio por cantidad. Indicar si el
+website ya los usa (con el conteo del snapshot o `volumePricing.enabled`) y si
+la tienda está lista; estas tres no pueden quedar `➖ NO APLICA`.
+
 ## Resultado ejecutivo
 
 Indicar una sola conclusión:
